@@ -2,6 +2,8 @@
 
 ## Converting Text To Speech With Emotion for Multi Speaker
 
+## Docker FILe is also available
+
 ## HOw To Run
   Train
   
