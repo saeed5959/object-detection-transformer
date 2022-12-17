@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from torch.nn.utils import weight_norm
 
 from emotional_tts.modules import Attention, ResBlock
-from emotional_tts.utils import make_mask
+from emotional_tts.utils import make_mask, mono_alighn
 
 class TextEncoder(nn.Module):
     def __init__(self):
@@ -23,13 +23,15 @@ class TextEncoder(nn.Module):
         
         
         
-    def forward(self, x, x_length):
+    def forward(self, x, x_length, speaker_embed, emotion_embed):
         
         x_embed = self.phon_embed(x)
         
         x_mask = make_mask(x_length, self.max_input)
         
         x_attn = self.trans_attention(x_embed, x_mask)
+        
+        x_attn = x_attn + speaker_embed + emotion_embed
         
         x_proj = self.proj(x_attn) * x_mask
         
@@ -151,9 +153,36 @@ class Discriminator(torch.nn.Module):
         
         
         
+class TextToSpeech(nn.Module):
+    def __init__(self):
+        super().__init__()
         
         
+        self.text_encoder = TextEncoder()
+        self.duration_pred = DurationPredictor()
+        self.flow = FlowBaseBlock()
+        self.generator = Generator()
         
+        self.speaker_embed_layer = nn.Embedding(10,128)
+        self.emotion_embed_layer = nn.Embedding(5,128)
+        
+        
+    def forward(self, x, x_length, y, y_length, speaker_id, emotion_id):
+        
+        speaker_embed = self.speaker_embed_layer(speaker_id)
+        emotion_embed = self.emotion_embed_layer(emotion_id)
+        
+        u, sigma, x_attn = self.text_encoder(x, x_length, speaker_embed, emotion_embed)
+        
+        x_dur_pred = self.duration_pred(x_attn)
+                
+        y_flow = self.flow(y, y_length)
+        
+        x_dur_mono = mono_alighn(u, sigma, y_flow)
+        
+        out = self.generator(y, y_length)
+        
+        return out, x_dur_mono, x_dur_pred
         
         
         

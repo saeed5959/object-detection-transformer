@@ -2,11 +2,6 @@ import torch
 from torch import nn
 from torch.nn.utils import weight_norm, remove_weight_norm
 from torch.nn import functional as F
-
-#not completed
-class Attention(nn.Module):
-    def __init__(self):
-        super().__init__()
         
         
         
@@ -27,3 +22,9 @@ class ResBlock(nn.Module):
         xt = F.leaky_relu(x)
         x = self.convs(xt)
         return x
+    
+    
+#not completed
+class Attention(nn.Module):
+    def __init__(self):
+        super().__init__()
