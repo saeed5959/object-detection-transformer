@@ -2,11 +2,12 @@ import torch
 import librosa
 from torch.utils.data import Dataset
 
+from core.settings import model_config
 
 class DatasetTTS(Dataset):
-    def __init__(self,training_file, config_model):
+    def __init__(self,training_file):
         super().__init__()
-        self.config_model = config_model 
+        self.config_model = model_config
         
         with open(training_file) as file:
             train_f = file.readlines()

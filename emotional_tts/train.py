@@ -3,27 +3,27 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from emotional_tts.models import TextToSpeech, Discriminator
-from core.settings import ConfigTrain, ConfigModel
+from core.settings import train_config
 from emotional_tts.data_utils import DatasetTTS
 
 
-def main(training_files:list, model_path:str):
+def main(training_files:str, model_path:str):
     
-    train_dataset = DatasetTTS(training_files, ConfigModel())
+    train_dataset = DatasetTTS(training_files)
     
     train_loader = DataLoader(train_dataset, num_workers=4, shuffle=True,
-                              batch_size=ConfigTrain.batch_size)
+                              batch_size=train_config.batch_size)
     
     model_g = TextToSpeech().cuda()
     model_d = Discriminator().cuda()
     
     optim_g = torch.optim.AdamW(
         model_g.parameters(),
-        ConfigTrain.learning_rate)
+        train_config.learning_rate)
     
     optim_d = torch.optim.AdamW(
         model_d.parameters(),
-        ConfigTrain.learning_rate)
+        train_config.learning_rate)
     
     loss_d = nn.NLLLoss()
     loss_g = nn.NLLLoss()
@@ -32,7 +32,7 @@ def main(training_files:list, model_path:str):
     model_g.train()
     model_d.train()
     
-    for epoch in range(ConfigTrain.epochs):
+    for epoch in range(train_config.epochs):
         for _, (x, x_length, y, y_length, speaker_id, emotion_id) in enumerate(train_loader):
             x, x_length = x.cuda(), x_length.cuda()
             y, y_length = y.cuda(), y_length.cuda()
@@ -60,6 +60,6 @@ def main(training_files:list, model_path:str):
             print(f"===<< EPOCH : {epoch}  >>====")
             print(f'disc:{loss_disc} , gen{loss_gen}, dur:{loss_dur}')
 
-        if epoch % ConfigTrain.save_model == 0:
+        if epoch % train_config.save_model == 0:
             torch.save(model_g, model_path)
 

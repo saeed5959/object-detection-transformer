@@ -5,15 +5,16 @@ from torch.nn.utils import weight_norm
 
 from emotional_tts.modules import Attention, ResBlock
 from emotional_tts.utils import make_mask, mono_alighn
+from core.settings import model_config
 
 class TextEncoder(nn.Module):
     def __init__(self):
         super().__init__()
-        self.n_phon: int = 178
-        self.embed_size: int = 128
-        self.max_input: int = 192
-        self.kernel_size:int = 3
-        self.p_dropout: int = 0.5
+        self.n_phon: int = model_config.n_phon
+        self.embed_size: int = model_config.embed_size
+        self.max_input: int = model_config.max_input
+        self.kernel_size:int = model_config.kernel_size
+        self.p_dropout: int = model_config.p_dropout
         
         self.phon_embed = nn.Embedding(self.n_phon, self.embed_size)
         
@@ -43,10 +44,12 @@ class TextEncoder(nn.Module):
 class DurationPredictor(nn.Module):
     def __init__(self):
         super().__init__()
-        self.embed_size: int = 128
-        self.max_input: int = 192
-        self.kernel_size:int = 3
-        self.p_dropout: int = 0.5
+        self.n_phon: int = model_config.n_phon
+        self.embed_size: int = model_config.embed_size
+        self.max_input: int = model_config.max_input
+        self.kernel_size:int = model_config.kernel_size
+        self.p_dropout: int = model_config.p_dropout
+        
         
         
         self.conv_1 = nn.Conv1d(self.max_input, self.max_input,self.kernel_size)
@@ -87,18 +90,17 @@ class FlowBaseBlock(nn.Module):
     
     
 class Generator(torch.nn.Module):
-    def __init__(self, initial_channel, resblock, resblock_kernel_sizes, resblock_dilation_sizes, upsample_rates,
-                 upsample_initial_channel, upsample_kernel_sizes, gin_channels=0):
+    def __init__(self):
         super(Generator, self).__init__()
-        self.num_kernels = len(resblock_kernel_sizes)
-        self.num_upsamples = len(upsample_rates)
-        self.conv_pre = nn.Conv1d(initial_channel, upsample_initial_channel, 7, 1, padding=3)
+        self.num_kernels = len(model_config.resblock_kernel_sizes)
+        self.num_upsamples = len(model_config.upsample_rates)
+        self.conv_pre = nn.Conv1d(model_config.initial_channel, model_config.upsample_initial_channel, 7, 1, padding=3)
         resblock = ResBlock()
 
         self.resblocks = nn.ModuleList()
         for i in range(len(self.ups)):
-            ch = upsample_initial_channel // (2 ** (i + 1))
-            for j, (k, d) in enumerate(zip(resblock_kernel_sizes, resblock_dilation_sizes)):
+            ch = model_config.upsample_initial_channel // (2 ** (i + 1))
+            for j, (k, d) in enumerate(zip(model_config.resblock_kernel_sizes, model_config.resblock_dilation_sizes)):
                 self.resblocks.append(resblock(ch, k, d))
 
         self.conv_post = nn.Conv1d(ch, 1, 7, 1, padding=3, bias=False) 

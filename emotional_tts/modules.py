@@ -1,15 +1,16 @@
 import torch
 from torch import nn
-from torch.nn.utils import weight_norm, remove_weight_norm
+from torch.nn.utils import weight_norm
 from torch.nn import functional as F
-        
+
+from core.settings import model_config
         
         
 class ResBlock(nn.Module):
     def __init__(self):
         super().__init__()
-        channels = 192
-        self.kernel_size:int = 3
+        channels = model_config.hidden_channels
+        self.kernel_size:int = model_config.kernel_size
         
         self.convs1 = nn.ModuleList([
             weight_norm(nn.Conv1d(channels, channels, self.kernel_size, 1)),
