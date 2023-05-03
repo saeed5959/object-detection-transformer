@@ -1,8 +1,6 @@
-# An implementation of vision transformer for Object Detection 
+# Vision Transformer for Object Detection 
 
-## 
-
-## Docker FILe is also available
+## An implementation of article [Link Text](https://arxiv.org/abs/2010.11929 "link")
 
 ## HOw To Run
   Train
