@@ -29,7 +29,7 @@ class SelfAttention(nn.Module):
         return img_vector_out
 
 
-class MultiHeadAttention(nn.Module);
+class MultiHeadAttention(nn.Module):
     def __init__(self):
         super().__init__()
 
