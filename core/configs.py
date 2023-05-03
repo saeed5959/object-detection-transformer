@@ -9,16 +9,7 @@ class ModelConfig:
     """
 
     def __init__(self):
-        self.resblock: int = 1
-        self.filter_channels: int = 768
-        self.hidden_channels: int = 192
-        self.upsample_rates: list = [8, 8, 2, 2]
-        self.n_phon: int = 178
-        self.embed_size: int = 128
-        self.max_input: int = 192
-        self.kernel_size:int = 3
-        self.p_dropout: int = 0.1
-        self.sample_ratye: int = 22050
+        self.dim_iput: int = 512
                                                                          
 
 

@@ -2,9 +2,9 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from emotional_tts.models import TextToSpeech, Discriminator
+from object_detection.models import TextToSpeech, Discriminator
 from core.settings import train_config
-from emotional_tts.data_utils import DatasetTTS
+from object_detection.data_utils import DatasetTTS
 
 
 def main(training_files:str, model_path:str):

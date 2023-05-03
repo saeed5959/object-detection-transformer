@@ -17,5 +17,5 @@ COPY . /voice_cloner/
 RUN python3.8 -m pip install -r /voice_cloner/requirements.txt
 RUN python3.8 -m pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
-WORKDIR /voice_cloner
+WORKDIR /object_detection
 

@@ -3,8 +3,8 @@ from torch import nn
 from torch.nn import functional as F
 from torch.nn.utils import weight_norm
 
-from emotional_tts.modules import Attention, ResBlock
-from emotional_tts.utils import make_mask, mono_alighn
+from object_detection.modules import Attention, ResBlock
+from object_detection.utils import make_mask, mono_alighn
 from core.settings import model_config
 
 class TextEncoder(nn.Module):
