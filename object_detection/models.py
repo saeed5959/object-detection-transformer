@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 from torch.nn.utils import weight_norm
 
-from object_detection.modules import Attention, ResBlock
+from object_detection.transformer import Attention, ResBlock
 from object_detection.utils import make_mask, mono_alighn
 from core.settings import model_config
 

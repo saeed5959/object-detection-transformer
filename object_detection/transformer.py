@@ -14,7 +14,6 @@ class SelfAttention_me(nn.Module):
         self.linear_2 = nn.Linear(self.dim_input, self.dim_input)
         self.linear_3 = nn.Linear(self.dim_input, self.dim_input)
 
-
     def forward(self, x : torch.Tensor):
 
         ### Scaled Dot-Product Attention
@@ -40,7 +39,7 @@ class MultiHeadAttention_me(nn.Module):
 
     def forward(self, x: torch.Tensor):
         out = [attention_head(x) for attention_head in self.heads]
-        out = torch.cat(out,dim=-1)
+        out = torch.cat(tuple(out),dim=-1)
         out = self.linear(out)
         
         return out 
@@ -52,13 +51,19 @@ class MultiHeadAttention(nn.Module):
         self.num_head = model_config.num_head
         self.dim_input = model_config.dim_iput
         self.head_dim = self.dim_input // self.num_head
-        self.linear_v = nn.Linear(self.head_dim, self.head_dim)
-        self.linear_k = nn.Linear(self.head_dim, self.head_dim)
-        self.linear_q = nn.Linear(self.head_dim, self.head_dim)
+        self.linear_v = nn.Linear(self.dim_input, self.dim_input)
+        self.linear_k = nn.Linear(self.dim_input, self.dim_input)
+        self.linear_q = nn.Linear(self.dim_input, self.dim_input)
         self.linear_out = nn.Linear(self.dim_input, self.dim_input)
 
     def forward(self, x : torch.Tensor):
-        b, m, _ = x.size() # x : [batch_size, m, dim_input]
+        ### Scaled Dot-Product Attention
+        V = x  
+        V_linear = self.linear_v(V)
+        K = x
+        K_linear = self.linear_k(K)
+        Q = x
+        Q_linear = self.linear_q(Q)
 
         #reshaping x for multihead
         ####
@@ -69,18 +74,12 @@ class MultiHeadAttention(nn.Module):
         #x = rearrange(x, 'b n (h d) -> b h n d', h = self.num_head)
         ###
         #my solution : you god damn right :)
-        x = torch.stack(list(torch.split(x,self.head_dim,-1)), dim=0)
-
-        ### Scaled Dot-Product Attention
-        V = x  # x : [batch_size, num_head, patch_size, head_dim]
-        V_linear = self.linear_v(V)
-        K = x
-        K_linear = self.linear_k(K)
-        Q = x
-        Q_linear = self.linear_q(Q)
-
+        V_linear = torch.stack(list(torch.split(V_linear, self.head_dim, -1)), dim=0)
+        K_linear = torch.stack(list(torch.split(K_linear, self.head_dim, -1)), dim=0)
+        Q_linear = torch.stack(list(torch.split(Q_linear, self.head_dim, -1)), dim=0)
+    
         out = torch.matmul(softmax(torch.matmul(K_linear, Q_linear.transpose(2,3))/torch.sqrt(self.dim_input), dim=-1), V_linear)
-        out = out.transpose(2, 3).contiguous().view(b, m, self.dim_input)
+        out = rearrange(out, 'b h n d -> b n (h d)')
         out = self.linear(out)
         
         return out
@@ -94,7 +93,8 @@ class Transformer(nn.Module):
         self.multihead = MultiHeadAttention() 
         self.conv1 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
         self.conv2 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
-        
+        #self.linear_1 = nn.Linear(self.dim_input, 2048)
+        #self.linear_2 = nn.Linear(2048, self.dim_input)
 
     def forward(self, x: torch.Tensor):
         out_multihead = self.multihead(x)
