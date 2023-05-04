@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from torch.nn.functional import softmax, relu, layer_norm
+from einops import rearrange
 
 from core.settings import model_config
         
@@ -24,7 +25,7 @@ class SelfAttention_me(nn.Module):
         Q = x
         Q_linear = self.linear_1(Q)
 
-        out = torch.matmul(V_linear, softmax(torch.matmul(K_linear, Q_linear.transpose)/torch.sqrt(self.dim_input), dim=-1).transpose)
+        out = torch.matmul(softmax(torch.matmul(K_linear, Q_linear.transpose(1,2))/torch.sqrt(self.dim_input), dim=-1), V_linear)
 
         return out
 
@@ -57,8 +58,18 @@ class MultiHeadAttention(nn.Module):
         self.linear_out = nn.Linear(self.dim_input, self.dim_input)
 
     def forward(self, x : torch.Tensor):
-        b, m, _ = x.size()
-        x.view = x.view(b, self.num_head, self.head_dim, m).transpose(2, 3)
+        b, m, _ = x.size() # x : [batch_size, m, dim_input]
+
+        #reshaping x for multihead
+        ####
+        #vits solution that I think it is not true
+        #x = x.view(b, self.num_head, self.head_dim, m).transpose(2, 3)
+        
+        #git solution that are same with my solution
+        #x = rearrange(x, 'b n (h d) -> b h n d', h = self.num_head)
+        ###
+        #my solution : you god damn right :)
+        x = torch.stack(list(torch.split(x,self.head_dim,-1)), dim=0)
 
         ### Scaled Dot-Product Attention
         V = x  # x : [batch_size, num_head, patch_size, head_dim]
@@ -68,7 +79,7 @@ class MultiHeadAttention(nn.Module):
         Q = x
         Q_linear = self.linear_q(Q)
 
-        out = torch.matmul(V_linear, softmax(torch.matmul(K_linear, Q_linear.transpose)/torch.sqrt(self.dim_input), dim=-1).transpose)
+        out = torch.matmul(softmax(torch.matmul(K_linear, Q_linear.transpose(2,3))/torch.sqrt(self.dim_input), dim=-1), V_linear)
         out = out.transpose(2, 3).contiguous().view(b, m, self.dim_input)
         out = self.linear(out)
         
@@ -97,5 +108,3 @@ class Transformer(nn.Module):
 
         return out
     
-
-        
