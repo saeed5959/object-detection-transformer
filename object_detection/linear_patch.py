@@ -5,6 +5,7 @@ from einops import rearrange
 
 from core.settings import model_config
 
+#the point of my idea is : I hate faltting because we will loose positional information
 
 class LinearProjection(nn.Module):
     def __init__(self):
@@ -13,11 +14,14 @@ class LinearProjection(nn.Module):
         self.source = model_config.source
         self.patch_dim = 3*self.num_divide^2
         self.linear = nn.Linear(self.patch_dim, self.patch_dim)
-        self.resnet = nn.Sequential(
-            nn.Conv2d(3,5,kernel_size=3),
-            nn.Conv2d(5,7),
-            nn.Conv2d(7,3),
-            nn.Linear(self.patch_dim,self.patch_dim)
+        self.conv_net = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3,padding="same",padding_mode="reflect"),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=3,padding="same",padding_mode="reflect"),
+            nn.ReLU(),
+            nn.Conv2d(128, 256, kernel_size=15),
+            nn.ReLU(),
+            nn.Flatten()
         )
         
 
@@ -42,10 +46,12 @@ class LinearProjection(nn.Module):
             out = self.linear(x)
             out = layer_norm(x)
         else:
-            out = self.resnet(x)
+            out = self.conv_net(x)
+            out = layer_norm(x)
 
         return out
     
     def position_embedding(self):
 
         return
+    
