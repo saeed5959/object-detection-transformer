@@ -12,6 +12,7 @@ class ModelConfig:
         self.dim_iput: int = 512
         self.num_head: int = 2
         self.num_divide: int = 15
+        self.num_patch: int = 16*16
         self.source: bool = False
                                                                          
 

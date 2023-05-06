@@ -5,14 +5,15 @@ from einops import rearrange
 
 from core.settings import model_config
 
-#the point of my idea is : I hate faltting because we will loose positional information
+#the point of my idea is : I hate flatting because we will loose positional information
 
 class LinearProjection(nn.Module):
     def __init__(self):
         super().__init__()
         self.num_divide =  model_config.num_divide
         self.source = model_config.source
-        self.patch_dim = 3*self.num_divide^2
+        self.num_patch = model_config.num_patch
+        self.patch_dim = 3*self.num_divide^2 if self.source else self.num_divide^2
         self.linear = nn.Linear(self.patch_dim, self.patch_dim)
         self.conv_net = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3,padding="same",padding_mode="reflect"),
@@ -23,14 +24,16 @@ class LinearProjection(nn.Module):
             nn.ReLU(),
             nn.Flatten()
         )
+        self.pos_embed = nn.Embedding(self.num_patch,self.patch_dim)
         
 
     def forward(self, x):
         x = self.divide_patch(x)
-        x = self.resnet(x)
-        x = self.position_embedding(x)
+        x = self.baseline(x)
+        pos = self.position_embedding(x)
+        out = x+pos
 
-        return x
+        return out
     
     def divide_patch(self, x):
         #x : [B, h, w, 3]
@@ -51,7 +54,12 @@ class LinearProjection(nn.Module):
 
         return out
     
-    def position_embedding(self):
-
-        return
+    def position_embedding(self, x):
+        #using a learnable 1D-embedding in a raster order
+        pos = torch.zeros(x.size())
+        index = torch.arange(0,self.num_patch).unsqueeze()
+        pos.scatter_(1, index, 1)
+        out = self.pos_embed(pos)
+    
+        return out
     
