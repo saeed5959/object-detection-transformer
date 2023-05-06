@@ -11,6 +11,8 @@ class ModelConfig:
     def __init__(self):
         self.dim_iput: int = 512
         self.num_head: int = 2
+        self.num_divide: int = 16
+        self.source: bool = False
                                                                          
 
 

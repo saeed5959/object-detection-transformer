@@ -91,18 +91,18 @@ class Transformer(nn.Module):
         super().__init__()
         self.dim_input = model_config.dim_iput
         self.multihead = MultiHeadAttention() 
-        self.conv1 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
-        self.conv2 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
-        #self.linear_1 = nn.Linear(self.dim_input, 2048)
-        #self.linear_2 = nn.Linear(2048, self.dim_input)
+        #self.conv1 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
+        #self.conv2 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
+        self.linear_1 = nn.Linear(self.dim_input, 2048)
+        self.linear_2 = nn.Linear(2048, self.dim_input)
 
     def forward(self, x: torch.Tensor):
         out_multihead = self.multihead(x)
         out_multihead_add_norm = layer_norm(out_multihead + x)
 
-        out_FFN = self.conv1(out_multihead_add_norm)
+        out_FFN = self.linear_1(out_multihead_add_norm)
         out_FFN = relu(out_FFN)
-        out_FFN = self.conv2(out_FFN)
+        out_FFN = self.linear_2(out_FFN)
 
         out = layer_norm(self.out_FFN + out_multihead_add_norm)
 
