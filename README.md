@@ -7,4 +7,4 @@
 
 ---
 ### The model architecture
-<img src="/vision_transformer.png" width="450" height="200" border="20" title="vision transformer">
+<img src="/vision_transformer.png" width="750" height="400" border="20" title="vision transformer">
