@@ -10,11 +10,11 @@ from core.settings import model_config
 class LinearProjection(nn.Module):
     def __init__(self):
         super().__init__()
-        self.num_divide =  model_config.num_divide
+        self.dim =  model_config.dim
         self.source = model_config.source
-        self.num_patch = model_config.num_patch
-        self.patch_dim = 3*self.num_divide^2 if self.source else self.num_divide^2
-        self.linear = nn.Linear(self.patch_dim, self.patch_dim)
+        self.patch_num = model_config.patch_num
+        self.patch_size = model_config.patch_size
+        self.linear = nn.Linear(self.dim, self.dim)
         self.conv_net = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3,padding="same",padding_mode="reflect"),
             nn.ReLU(),
@@ -24,7 +24,7 @@ class LinearProjection(nn.Module):
             nn.ReLU(),
             nn.Flatten()
         )
-        self.pos_embed = nn.Embedding(self.num_patch,self.patch_dim)
+        self.pos_embed = nn.Embedding(self.patch_num,self.dim)
         
 
     def forward(self, x):
@@ -38,9 +38,9 @@ class LinearProjection(nn.Module):
     def divide_patch(self, x):
         #x : [B, h, w, 3]
         if self.source:
-            out = rearrange(x, 'b c (h ph) (w pw) -> b (h w) (ph pw c)', ph = self.divide_patch, pw = self.divide_patch)
+            out = rearrange(x, 'b c (h ph) (w pw) -> b (h w) (ph pw c)', ph = self.patch_size, pw = self.patch_size)
         else:
-            out = rearrange(x, 'b c (h ph) (w pw) -> b (h w) c ph pw ', ph = self.divide_patch, pw=self.divide_patch)
+            out = rearrange(x, 'b c (h ph) (w pw) -> b (h w) c ph pw ', ph = self.patch_size, pw=self.patch_size)
         
         return out
     
@@ -57,7 +57,7 @@ class LinearProjection(nn.Module):
     def position_embedding(self, x):
         #using a learnable 1D-embedding in a raster order
         pos = torch.zeros(x.size())
-        index = torch.arange(0,self.num_patch).unsqueeze()
+        index = torch.arange(0,self.patch_num).unsqueeze()
         pos.scatter_(1, index, 1)
         out = self.pos_embed(pos)
     

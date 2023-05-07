@@ -9,11 +9,14 @@ class ModelConfig:
     """
 
     def __init__(self):
-        self.dim_iput: int = 512
-        self.num_head: int = 2
-        self.num_divide: int = 15
-        self.num_patch: int = 16*16
+        self.height: int = 256
+        self.width: int = 256
+        self.dim: int = 752
+        self.head_num: int = 2
+        self.patch_size: int = 16
+        self.patch_num: int = (self.height * self.width) / (self.patch_size^2) 
         self.source: bool = False
+        self.class_num: int = 5
                                                                          
 
 
