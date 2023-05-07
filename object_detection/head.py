@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+from torch.nn.functional import softmax
 from core.settings import model_config
 
 
@@ -14,6 +14,7 @@ class HeadDetect(nn.Module):
 
     def forward(self, x):
         class_out = self.linear_class(x)
+        class_out = softmax(class_out)
         box_out = self.linear_box(x)
 
         return class_out, box_out

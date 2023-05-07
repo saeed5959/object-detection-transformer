@@ -16,7 +16,7 @@ class LinearProjection(nn.Module):
         self.patch_size = model_config.patch_size
         self.linear = nn.Linear(self.dim, self.dim)
         self.conv_net = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=3),
+            nn.Conv2d(3, 3, kernel_size=3),
             nn.Conv2d(16, 32, kernel_size=3),
             nn.ReLU(),
             nn.MaxPool2d(3, stride=3),
