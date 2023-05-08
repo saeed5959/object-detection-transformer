@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from object_detection.models import TextToSpeech, Discriminator
+from object_detection import models
 from core.settings import train_config
 from object_detection.data_utils import DatasetTTS
 

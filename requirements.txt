@@ -1,10 +1,2 @@
-Cython==0.29.21
-numpy==1.21.6
-librosa==0.8.0
-phonemizer==2.2.1
-scipy==1.8.1
 torch==1.11.0
-Unidecode==1.1.1
-soundfile==0.10.3.post1
-ffmpeg-python==0.2.0
-gruut==2.3.2
+einops==0.6.1
