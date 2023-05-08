@@ -11,7 +11,7 @@ class ModelConfig:
     def __init__(self):
         self.height: int = 256
         self.width: int = 256
-        self.dim: int = 752
+        self.dim: int = 768
         self.head_num: int = 2
         self.patch_size: int = 16
         self.patch_num: int = (self.height * self.width) / (self.patch_size^2) 

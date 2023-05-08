@@ -24,7 +24,7 @@ class SelfAttention_me(nn.Module):
         Q = x
         Q_linear = self.linear_1(Q)
 
-        out = torch.matmul(softmax(torch.matmul(K_linear, Q_linear.transpose(1,2))/torch.sqrt(self.dim), dim=-1), V_linear)
+        out = torch.matmul(softmax(torch.matmul(Q_linear, K_linear.transpose(1,2))/torch.sqrt(self.dim), dim=-1), V_linear)
 
         return out
 
@@ -78,7 +78,7 @@ class MultiHeadAttention(nn.Module):
         K_linear = torch.stack(list(torch.split(K_linear, self.head_dim, -1)), dim=0)
         Q_linear = torch.stack(list(torch.split(Q_linear, self.head_dim, -1)), dim=0)
     
-        out = torch.matmul(softmax(torch.matmul(K_linear, Q_linear.transpose(2,3))/torch.sqrt(self.dim), dim=-1), V_linear)
+        out = torch.matmul(softmax(torch.matmul(Q_linear, V_linear.transpose(2,3))/torch.sqrt(self.dim), dim=-1), V_linear)
         out = rearrange(out, 'b h n d -> b n (h d)')
         out = self.linear_out(out)
         
@@ -91,8 +91,6 @@ class Transformer(nn.Module):
         super().__init__()
         self.dim = model_config.dim
         self.multihead = MultiHeadAttention() 
-        #self.conv1 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
-        #self.conv2 = nn.Conv1d(self.dim_input, self.dim_input, kernel_size=1)
         self.linear_1 = nn.Linear(self.dim, 2048)
         self.linear_2 = nn.Linear(2048, self.dim)
 

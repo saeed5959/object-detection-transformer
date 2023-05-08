@@ -1,11 +1,10 @@
 import torch
 from torch import nn
-from torch.nn.functional import layer_norm
+from torch.nn.functional import layer_norm, relu
 from einops import rearrange
 
 from core.settings import model_config
 
-#the point of my idea is : I hate flatting because we will loose positional information
 
 class LinearProjection(nn.Module):
     def __init__(self):
@@ -15,44 +14,55 @@ class LinearProjection(nn.Module):
         self.patch_num = model_config.patch_num
         self.patch_size = model_config.patch_size
         self.linear = nn.Linear(self.dim, self.dim)
-        self.conv_net = nn.Sequential(
-            nn.Conv2d(3, 3, kernel_size=3),
-            nn.Conv2d(16, 32, kernel_size=3),
+        self.conv2d_1 = nn.Sequential(
+            nn.Conv2d(3, 16, kernel_size=3, padding_mode='same'),
+            nn.BatchNorm2d(),
             nn.ReLU(),
-            nn.MaxPool2d(3, stride=3),
-            nn.Conv2d(32, 48, kernel_size=3),
-            nn.ReLU(),
-            nn.Flatten()
+            nn.Conv2d(16, 32, kernel_size=3, padding_mode='same'),
+            nn.BatchNorm2d(),
         )
+        self.conv2d_2 =nn.Sequential(
+            nn.Conv2d(32, 32, kernel_size=3, padding_mode='same'),
+            nn.BatchNorm2d(),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=3, padding_mode='same'),
+            nn.BatchNorm2d(),
+        )
+        self.conv1d_1 = nn.Conv2d(3, 32, kernel_size=1, padding_mode='same')
+        self.conv1d_2 = nn.Conv2d(32, 64, kernel_size=1, padding_mode='same')
+        self.maxpool_1 = nn.MaxPool2d(2)
+        self.maxpool_2 = nn.MaxPool2d(2)
         self.pos_embed = nn.Embedding(self.patch_num,self.dim)
         
 
     def forward(self, x):
-        x = self.divide_patch(x)
-        x = self.baseline(x)
+        if self.source:
+            x = self.divide_patch(x,downsample=1)
+            out = self.linear(x)
+            out = layer_norm(x)
+        else:
+            x = self.resnet(x)
+            x = self.divide_patch(x, downsample=4)
+            out = layer_norm(x)
+            
         pos = self.position_embedding(x)
         out = x+pos
 
         return out
     
-    def divide_patch(self, x):
-        #x : [B, h, w, 3]
-        if self.source:
-            out = rearrange(x, 'b c (h ph) (w pw) -> b (h w) (ph pw c)', ph = self.patch_size, pw = self.patch_size)
-        else:
-            out = rearrange(x, 'b c (h ph) (w pw) -> b (h w) c ph pw ', ph = self.patch_size, pw=self.patch_size)
+    def divide_patch(self, x, downsample):
+        out = rearrange(x, 'b c (h ph) (w pw) -> b (h w) (ph pw c)', ph = self.patch_size / downsample, pw = self.patch_size / downsample)
         
         return out
     
-    def baseline(self, x):
-        if self.source:
-            out = self.linear(x)
-            out = layer_norm(x)
-        else:
-            out = self.conv_net(x)
-            out = layer_norm(x)
+    def resnet(self, x):
+        x_conv2d_1 = self.conv2d_1(x)
+        x_maxpool_1 = self.maxpool_1(relu(x_conv2d_1 + self.conv1d_1(x)))
 
-        return out
+        x_conv2d_2 = self.conv2d_2(x_maxpool_1)
+        x_maxpool_2 = self.maxpool_2(relu(x_conv2d_2 + self.conv1d_1(x_maxpool_1)))
+
+        return x_maxpool_2
     
     def position_embedding(self, x):
         #using a learnable 1D-embedding in a raster order
