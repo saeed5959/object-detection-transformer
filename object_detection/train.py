@@ -4,18 +4,16 @@ from torch.utils.data import DataLoader
 
 from object_detection import models
 from core.settings import train_config
-from object_detection.data_utils import DatasetTTS
+from object_detection.data_utils import DatasetObjectDetection
 
 
 def main(training_files:str, model_path:str):
     
-    train_dataset = DatasetTTS(training_files)
+    train_dataset = DatasetObjectDetection(training_files)
     
     train_loader = DataLoader(train_dataset, num_workers=4, shuffle=True,
                               batch_size=train_config.batch_size)
-    
-    model_g = TextToSpeech().cuda()
-    model_d = Discriminator().cuda()
+
     
     optim_g = torch.optim.AdamW(
         model_g.parameters(),
