@@ -9,6 +9,10 @@
 <img src="/model.png" width="900" height="300" border="20" title="model">
 
 ---
+### PO Matrix
+<img src="/po_matrix.png" width="900" height="300" border="20" title="model">
+
+---
 
 # Place of Attention Matters!
 
