@@ -3,6 +3,7 @@ import os
 import cv2
 import numpy as np
 
+from core.settings import model_config
 
 def img_preprocess(img_path: str, img_path_out: str):
 
@@ -28,20 +29,51 @@ def normalize_bbox(bbox: list, height: int, width: int):
 
     return c_x, c_y, w, h
 
+def find_most_repetitive(data):
+
+    unique_values = np.unique(data)
+    counts = np.array([np.count_nonzero(data == val) for val in unique_values])
+    max_index = np.argmax(counts)
+    most_repetitive_value = unique_values[max_index]
+
+    return most_repetitive_value
+
+
 def color_object_segment(segment_path: str, data: list):
+
     #consider rgb or gray color
-    data_color = []
+    data_color = {}
     segment = cv2.imread(segment_path,0)
     for box in data:
-        category_id, bbox = box["category_id"], box["bbox"]#c0_x, c0_y, w, h = bbox
+        id, bbox = box["id"], box["bbox"]#c0_x, c0_y, w, h = bbox
         c0_x, c0_y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
         segment_box = segment[c0_y:c0_y+h ,c0_x:c0_x+w]
 
-        unique_values = np.unique(segment_box)
-        counts = np.array([np.count_nonzero(segment_box == val) for val in unique_values])
-        max_index = np.argmax(counts)
-        most_repetitive_value = unique_values[max_index]
-        data_color.append(most_repetitive_value)
+        color = find_most_repetitive(segment_box)
+        data_color[color] = {"category_id":box["category_id"], "bbox":box["bbox"]}
+
+    return data_color
+
+
+def patch_info(img_path: str, segment_path: str, segment_color: dict):
+
+    patch_data = []
+    patch_num = model_config.patch_num
+    segment = cv2.imread(segment_path,0)
+    height, width = segment.size
+    step_size_height = height/patch_num
+    step_size_width = width/patch_num
+
+    patch_data = img_path
+    for h in range(patch_num):
+        for w in range(patch_num):
+            segment_box = segment[int(h*step_size_height):int((h+1)*step_size_height),int(w*step_size_width):int((w+1)*step_size_width)]
+            color = find_most_repetitive(segment_box)
+            category_id, bbox = segment_color[color]["category_id"], segment_color[color]["bbox"]
+            c_x, c_y, w, h = normalize_bbox(bbox, height, width)
+            patch_data += "|" + category_id + "," + c_x + "," + c_y + "," + w + "," + h
+
+    return patch_data
 
 
 def main():
@@ -67,19 +99,9 @@ def main():
         height, width = img_preprocess(img_path, img_path_out)
         data_line += img_path_out 
 
-        
-        color_object_segment(segment_path, data["segments_info"])
-        for box in data["segments_info"]:
-            category_id, bbox = box["category_id"], box["bbox"]#c0_x, c0_y, w, h = bbox
-            c0_x, c0_y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
-            segment[]
-
-
-            c_x, c_y, w, h = normalize_bbox(bbox, height, width)
-            data_line += "|" + str(category_id) + "," + str(bbox[0]) + "," + str(bbox[1]) + "," + str(bbox[2]) + "," + str(bbox[3])
-        
-        data_file_out.append(data_line)
-
+        segment_color = color_object_segment(segment_path, data["segments_info"])
+        patch_data = patch_info(img_path, segment_path, segment_color)
+        data_file_out.append(patch_data)
 
     file_path_out = os.path.join(dataset_folder_path,"dataset_file.txt")
     save_file(file_path_out, data_file_out)
