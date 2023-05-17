@@ -2,7 +2,7 @@
 
 ---
 
-## An new implementation of object detection in pytorch : article is [Here](article.pdf) 
+## Official implementation of object detection in pytorch : Article is [Here](article.pdf) 
 ## This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.11929) and [Detr](https://arxiv.org/abs/2005.12872)
 ---
 ### Model Architecture
