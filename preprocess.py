@@ -3,6 +3,7 @@ import os
 import cv2
 import numpy as np
 from tqdm import tqdm
+
 from core.settings import model_config
 
 def img_preprocess(img_path: str, img_path_out: str):
@@ -47,7 +48,7 @@ def color_object_segment(segment_path: str, data: list):
     color_list = []
     segment = cv2.imread(segment_path)
     for box in data:
-        if box["category_id"] < 91:
+        if box["category_id"] < model_config.class_num:
             bbox = box["bbox"]
             c0_x, c0_y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
             segment_box = segment[c0_y:c0_y+h ,c0_x:c0_x+w]

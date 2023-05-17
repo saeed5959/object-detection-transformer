@@ -1,8 +1,8 @@
 import torch
 from torch import nn
-from torch.nn.functional import softmax
-from core.settings import model_config
+from torch.nn.functional import softmax, relu
 
+from core.settings import model_config
 
 class HeadDetect(nn.Module):
     def __init__(self):
@@ -18,6 +18,6 @@ class HeadDetect(nn.Module):
         x_and_similarity = torch.cat((x, similarity_matrix), dim=-1)
 
         class_out = softmax(self.linear_class(x_and_similarity), dim=-1)
-        box_out = self.linear_box(x_and_similarity)
+        box_out = relu(self.linear_box(x_and_similarity))
 
         return class_out, box_out

@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 import cv2
+import numpy as np
 
 from core.settings import model_config
 
@@ -23,15 +24,21 @@ class DatasetObjectDetection(Dataset):
 
         #read bounding box
         data_list = data_list[1:]
-        bounding_box = []
+        bbox = []
+        class_id = []
+        class_mask = []
         for patch in data_list:
             c, x, y, w, h = patch.split(",")
             c, x, y, w, h = int(c), int(x), int(y), int(w), int(h)            
-            bounding_box.append([c, x, y, w, h])
+            bbox.append([x, y, w, h])
+            class_id.append(np.eye(model_config.class_num)[c])
+            class_mask.append([c])
 
-        bounding_box = torch.Tensor(bounding_box)
-        
-        return img, bounding_box
+        bbox = torch.Tensor(bbox)
+        class_id = torch.Tensor(class_id)
+        class_mask = torch.Tensor(class_mask)
+
+        return img, class_id, bbox, class_mask
     
     def __getitem__(self,index):
         return self.get_image(self.dataset_file[index])

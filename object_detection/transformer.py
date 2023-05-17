@@ -56,6 +56,10 @@ class MultiHeadAttention(nn.Module):
         self.linear_q = nn.Linear(self.dim, self.dim)
         self.linear_out = nn.Linear(self.dim, self.dim)
 
+        nn.init.xavier_uniform_(self.linear_v.weight)
+        nn.init.xavier_uniform_(self.linear_k.weight)
+        nn.init.xavier_uniform_(self.linear_q.weight)
+
     def forward(self, x : torch.Tensor):
         ### Scaled Dot-Product Attention
         V = x  
@@ -73,7 +77,7 @@ class MultiHeadAttention(nn.Module):
         #git solution that are same with my solution
         #x = rearrange(x, 'b n (h d) -> b h n d', h = self.num_head)
         ###
-        #my solution : you god damn right :)
+        #my solution : you're god damn right :)
         V_linear = torch.stack(list(torch.split(V_linear, self.head_dim, -1)), dim=0)
         K_linear = torch.stack(list(torch.split(K_linear, self.head_dim, -1)), dim=0)
         Q_linear = torch.stack(list(torch.split(Q_linear, self.head_dim, -1)), dim=0)

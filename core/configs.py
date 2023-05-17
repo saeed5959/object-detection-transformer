@@ -17,7 +17,7 @@ class ModelConfig:
         self.patch_num: int = 256
         self.patch_num_h: int = 16
         self.source: bool = False
-        self.class_num: int = 5
+        self.class_num: int = 90 + 1 # 1=background
                                                                          
 
 
@@ -28,6 +28,6 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 100
-        self.epochs: int = 500
+        self.epochs: int = 1000
         self.batch_size: int = 8
-        self.learning_rate: float = 0.0002
+        self.learning_rate: float = 0.0001
