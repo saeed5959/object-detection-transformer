@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset
 import cv2
 import numpy as np
+import random
 
 from core.settings import model_config
 
@@ -19,7 +20,7 @@ class DatasetObjectDetection(Dataset):
 
         #read image and convert to tensor
         img_path = data_list[0]
-        img = cv2.imread(img_path)
+        img = cv2.imread(img_path) / 255
         img = torch.Tensor(img)
 
         #read bounding box
@@ -31,7 +32,11 @@ class DatasetObjectDetection(Dataset):
             c, x, y, w, h = patch.split(",")
             c, x, y, w, h = int(c), int(x), int(y), int(w), int(h)            
             bbox.append([x, y, w, h])
-            class_id.append(np.eye(model_config.class_num)[c])
+            #label smoothing
+            label_smoothing = np.abs(np.random.normal(0,0.05))
+            patch_class = np.eye(model_config.class_num)[c]
+            patch_class[c] = patch_class[c] - label_smoothing 
+            class_id.append(patch_class)
             class_mask.append([c])
 
         bbox = torch.Tensor(bbox)
@@ -56,8 +61,22 @@ class DatasetObjectDetection(Dataset):
 
 def augmentation(img, class_id, bbox, class_mask):
 
+    #shift : yes
 
+    #scale : yes
 
+    #rotation : yes
 
+    #occlusion : cutout : yes
+
+    #label smoothing : yes : done
+
+    #normalize value of image form 255 to 1 : yes : done
+
+    #dropout : no
+
+    #mosaic : no
+
+    #cutmix : no
 
     return img, class_id, bbox, class_mask
