@@ -28,6 +28,7 @@ def main(training_files:str, model_path:str):
             
             loss_class_out = loss_class(class_out, class_input)
 
+            #ignore background
             bbox_input_mask = torch.masked_select(bbox_input, class_mask>0)
             bbox_output_mask = torch.masked_select(bbox_out, class_mask>0)
             loss_box_out = loss_box(bbox_input_mask, bbox_output_mask)

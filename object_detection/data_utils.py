@@ -6,14 +6,14 @@ import numpy as np
 from core.settings import model_config
 
 class DatasetObjectDetection(Dataset):
-    def __init__(self, dataset_file_path):
+    def __init__(self, dataset_file_path, transform):
         super().__init__()
         self.model_config = model_config
         with open(dataset_file_path) as file:
             self.dataset_file = file.readlines()
-
+        self.transform = transform
         
-    def get_image(self, data):
+    def get_image(self, data: str, augment: bool):
         #split data with |
         data_list = data.split("|")
 
@@ -38,10 +38,26 @@ class DatasetObjectDetection(Dataset):
         class_id = torch.Tensor(class_id)
         class_mask = torch.Tensor(class_mask)
 
+        #augmentation
+        if augment:
+            img, class_id, bbox, class_mask = self.transform(img, class_id, bbox, class_mask)
+
         return img, class_id, bbox, class_mask
     
     def __getitem__(self,index):
-        return self.get_image(self.dataset_file[index])
+        if index//4==0:
+            return self.get_image(self.dataset_file[index], augment=False)
+        else:    
+            return self.get_image(self.dataset_file[index], augment=True)
     
     def __len__(self):
-        return len(self.dataset_file)
+        return len(self.dataset_file)*4
+    
+
+def augmentation(img, class_id, bbox, class_mask):
+
+
+
+
+
+    return img, class_id, bbox, class_mask
