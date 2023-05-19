@@ -1,24 +1,25 @@
-# An End-to-End Object Detection with Vision Transformation
+# An End-to-End Object Detection with Vision Transformation [Link](article.pdf)
 
-
-## Official implementation of "Place of Attention Matters!" in pytorch : Article is [Here](article.pdf) 
+Official implementation of "Place of Attention Matters!" in pytorch : Article is [Here](article.pdf) .
 <br/>
 
-## This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.11929) and [Detr](https://arxiv.org/abs/2005.12872)
+This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.11929) and [Detr](https://arxiv.org/abs/2005.12872).
+<br/>
+
+The pre-train model will be added soon!!!
+
 ---
-<br/>
-
 ### Model Architecture
 <img src="/model.png" width="900" height="300" border="20" title="model">
 
 ---
 
-<br/><br/>
+<br/>
 
 # Place of Attention Matters! 
 <br/>
 
-## An End-to-End Object Detection with Vision Transformation
+An End-to-End Object Detection with Vision Transformation
 
 
 In the object detection task, the purpose is to find the class of object and a bounding box
@@ -33,4 +34,4 @@ Our implementation can perform in real-time and improve the accuracy of previous
 ---
 <br/>
 
-## The pre-train model will be added soon!!!
+## 
