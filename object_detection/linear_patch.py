@@ -25,11 +25,11 @@ class LinearProjection(nn.Module):
             nn.Conv2d(32, 32, kernel_size=3, padding_mode='same'),
             nn.BatchNorm2d(),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding_mode='same'),
+            nn.Conv2d(32, 48, kernel_size=3, padding_mode='same'),
             nn.BatchNorm2d(),
         )
         self.conv1d_1 = nn.Conv2d(3, 32, kernel_size=1, padding_mode='same')
-        self.conv1d_2 = nn.Conv2d(32, 64, kernel_size=1, padding_mode='same')
+        self.conv1d_2 = nn.Conv2d(32, 48, kernel_size=1, padding_mode='same')
         self.maxpool_1 = nn.MaxPool2d(2)
         self.maxpool_2 = nn.MaxPool2d(2)
         self.pos_embed = nn.Embedding(self.patch_num,self.dim)

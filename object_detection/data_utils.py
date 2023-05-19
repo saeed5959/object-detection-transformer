@@ -79,4 +79,8 @@ def augmentation(img, class_id, bbox, class_mask):
 
     #cutmix : no
 
+    #patch can contain more than one object then the label can be [0.6 0.4] instead of [1 0]
+
+    #object can be so tiny that is inside a patch but IOU is less than 0.5
+
     return img, class_id, bbox, class_mask
