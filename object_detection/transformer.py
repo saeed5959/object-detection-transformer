@@ -24,7 +24,7 @@ class SelfAttention_me(nn.Module):
         Q = x
         Q_linear = self.linear_1(Q)
 
-        out = torch.matmul(softmax(torch.matmul(Q_linear, K_linear.transpose(1,2))/torch.sqrt(self.dim), dim=-1), V_linear)
+        out = torch.matmul(softmax(torch.matmul(Q_linear, K_linear.transpose(1,2))/torch.sqrt(torch.tensor(self.dim)), dim=-1), V_linear)
 
         return out
 
@@ -61,6 +61,7 @@ class MultiHeadAttention(nn.Module):
         nn.init.xavier_uniform_(self.linear_q.weight)
 
     def forward(self, x : torch.Tensor):
+
         ### Scaled Dot-Product Attention
         V = x  
         V_linear = self.linear_v(V)
@@ -70,19 +71,13 @@ class MultiHeadAttention(nn.Module):
         Q_linear = self.linear_q(Q)
 
         #reshaping x for multihead
-        ####
-        #vits solution that I think it is not true
-        #x = x.view(b, self.num_head, self.head_dim, m).transpose(2, 3)
+        V_linear = rearrange(V_linear, 'b n (h d) -> b h n d', h = self.head_num)
+        K_linear = rearrange(K_linear, 'b n (h d) -> b h n d', h = self.head_num)
+        Q_linear = rearrange(Q_linear, 'b n (h d) -> b h n d', h = self.head_num)
         
-        #git solution that are same with my solution
-        #x = rearrange(x, 'b n (h d) -> b h n d', h = self.num_head)
-        ###
-        #my solution : you're god damn right :)
-        V_linear = torch.stack(list(torch.split(V_linear, self.head_dim, -1)), dim=0)
-        K_linear = torch.stack(list(torch.split(K_linear, self.head_dim, -1)), dim=0)
-        Q_linear = torch.stack(list(torch.split(Q_linear, self.head_dim, -1)), dim=0)
-    
-        out = torch.matmul(softmax(torch.matmul(Q_linear, V_linear.transpose(2,3))/torch.sqrt(self.dim), dim=-1), V_linear)
+        out = torch.matmul(softmax(torch.matmul(Q_linear, V_linear.transpose(2,3))/torch.sqrt(torch.tensor(self.dim)), dim=-1), V_linear)
+
+        #back reshaping from multihead
         out = rearrange(out, 'b h n d -> b n (h d)')
         out = self.linear_out(out)
         
@@ -100,13 +95,13 @@ class Transformer(nn.Module):
 
     def forward(self, x: torch.Tensor):
         out_multihead = self.multihead(x)
-        out_multihead_add_norm = layer_norm(out_multihead + x)
+        out_multihead_add_norm = layer_norm(out_multihead + x, [x.size()[-1]])
 
         out_FFN = self.linear_1(out_multihead_add_norm)
         out_FFN = relu(out_FFN)
         out_FFN = self.linear_2(out_FFN)
 
-        out = layer_norm(self.out_FFN + out_multihead_add_norm)
+        out = layer_norm(out_FFN + out_multihead_add_norm, [x.size()[-1]])
 
         return out
     

@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import cv2
 import numpy as np
 import random
+from einops import rearrange
 
 from core.settings import model_config
 
@@ -21,6 +22,7 @@ class DatasetObjectDetection(Dataset):
         #read image and convert to tensor
         img_path = data_list[0]
         img = cv2.imread(img_path) / 255
+        img = rearrange(img, 'h w c -> c h w')
         img = torch.Tensor(img)
 
         #read bounding box
@@ -30,7 +32,7 @@ class DatasetObjectDetection(Dataset):
         class_mask = []
         for patch in data_list:
             c, x, y, w, h = patch.split(",")
-            c, x, y, w, h = int(c), int(x), int(y), int(w), int(h)            
+            c, x, y, w, h = int(c), float(x), float(y), float(w), float(h)            
             bbox.append([x, y, w, h])
             #label smoothing
             label_smoothing = np.abs(np.random.normal(0,0.05))
@@ -39,9 +41,9 @@ class DatasetObjectDetection(Dataset):
             class_id.append(patch_class)
             class_mask.append([c])
 
-        bbox = torch.Tensor(bbox)
-        class_id = torch.Tensor(class_id)
-        class_mask = torch.Tensor(class_mask)
+        bbox = torch.Tensor(np.array(bbox))
+        class_id = torch.Tensor(np.array(class_id))
+        class_mask = torch.Tensor(np.array(class_mask))
 
         #augmentation
         if augment:
@@ -50,13 +52,16 @@ class DatasetObjectDetection(Dataset):
         return img, class_id, bbox, class_mask
     
     def __getitem__(self,index):
-        if index//4==0:
+        if self.model_config.augmentation:
+            if index//self.model_config.augment_num == 0:
+                return self.get_image(self.dataset_file[index], augment=False)
+            else:    
+                return self.get_image(self.dataset_file[index], augment=True)
+        else:
             return self.get_image(self.dataset_file[index], augment=False)
-        else:    
-            return self.get_image(self.dataset_file[index], augment=True)
     
     def __len__(self):
-        return len(self.dataset_file)*4
+        return len(self.dataset_file)*self.model_config.augment_num
     
 
 def augmentation(img, class_id, bbox, class_mask):

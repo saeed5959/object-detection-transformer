@@ -4,12 +4,12 @@ from torch.utils.data import DataLoader
 
 from object_detection import models
 from core.settings import train_config
-from object_detection.data_utils import DatasetObjectDetection
+from object_detection.data_utils import DatasetObjectDetection, augmentation
 
 
 def main(training_files:str, model_path:str, device: str):
     
-    train_dataset = DatasetObjectDetection(training_files)
+    train_dataset = DatasetObjectDetection(training_files, augmentation)
     
     train_loader = DataLoader(train_dataset, num_workers=4, shuffle=True,
                               batch_size=train_config.batch_size)
@@ -22,8 +22,9 @@ def main(training_files:str, model_path:str, device: str):
     model.to(device)
     
     for epoch in range(train_config.epochs):
-        for img, class_input, bbox_input, class_mask in enumerate(train_loader):
-            img, bbox, class_input, class_mask = img.to(device), bbox.to(device), class_input.to(device), class_mask.to(device)
+        print(f"===<< EPOCH : {epoch}  >>====")
+        for step, (img, class_input, bbox_input, class_mask) in enumerate(train_loader):
+            img, bbox_input, class_input, class_mask = img.to(device), bbox_input.to(device), class_input.to(device), class_mask.to(device)
             
             class_out, bbox_out = model(img)
             
@@ -40,7 +41,7 @@ def main(training_files:str, model_path:str, device: str):
             loss_all.backward()
             optim.step()
             
-            print(f"===<< EPOCH : {epoch}  >>====")
+            print(f"===<< STEP : {step}  >>====")
             print(f'loss_class : {loss_class_out} , loss_box : {loss_box_out}')
 
         if epoch % train_config.save_model == 0:

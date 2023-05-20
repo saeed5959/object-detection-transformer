@@ -18,6 +18,8 @@ class ModelConfig:
         self.patch_num_h: int = 16
         self.source: bool = False
         self.class_num: int = 90 + 1 # 1=background
+        self.augmentation: bool = False
+        self.augment_num: int = 1
                                                                          
 
 
