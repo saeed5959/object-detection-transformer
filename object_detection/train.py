@@ -1,14 +1,17 @@
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from object_detection import models
 from core.settings import train_config
 from object_detection.data_utils import DatasetObjectDetection, augmentation
 
 
+
 def main(training_files:str, model_path:str, device: str):
-    
+
+    writer = SummaryWriter()    
     train_dataset = DatasetObjectDetection(training_files, augmentation)
     
     train_loader = DataLoader(train_dataset, num_workers=4, shuffle=True,
@@ -41,6 +44,10 @@ def main(training_files:str, model_path:str, device: str):
             loss_all.backward()
             optim.step()
             
+            #writing in tensorboard
+            writer.add_scalar("loss_class", loss_class_out, step)
+            writer.add_scalar("loss_box", loss_box_out, step)
+            #printing loss
             print(f"===<< STEP : {step}  >>====")
             print(f'loss_class : {loss_class_out} , loss_box : {loss_box_out}')
 

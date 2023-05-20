@@ -2,7 +2,6 @@ import torch
 from torch.utils.data import Dataset
 import cv2
 import numpy as np
-import random
 from einops import rearrange
 
 from core.settings import model_config
