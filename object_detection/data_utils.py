@@ -83,4 +83,8 @@ def augmentation(img, class_id, bbox, class_mask):
 
     #object can be so tiny that is inside a patch but IOU is less than 0.5
 
+    #I am not sure mask loss for background bbox
+
+    #write inference mode
+
     return img, class_id, bbox, class_mask

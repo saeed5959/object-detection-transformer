@@ -7,7 +7,7 @@ from core.settings import train_config
 from object_detection.data_utils import DatasetObjectDetection
 
 
-def main(training_files:str, model_path:str):
+def main(training_files:str, model_path:str, device: str):
     
     train_dataset = DatasetObjectDetection(training_files)
     
@@ -19,10 +19,11 @@ def main(training_files:str, model_path:str):
     loss_class = nn.CrossEntropyLoss()
     loss_box = nn.MSELoss()    
     model.train()
+    model.to(device)
     
     for epoch in range(train_config.epochs):
         for img, class_input, bbox_input, class_mask in enumerate(train_loader):
-            img, bbox = img.cuda(), bbox.cuda()
+            img, bbox, class_input, class_mask = img.to(device), bbox.to(device), class_input.to(device), class_mask.to(device)
             
             class_out, bbox_out = model(img)
             
