@@ -1,7 +1,7 @@
 """
     All config is in here
 """
-
+import torch
 
 class ModelConfig:
     """
@@ -17,7 +17,7 @@ class ModelConfig:
         self.patch_num: int = 256
         self.patch_num_h: int = 16
         self.source: bool = False
-        self.class_num: int = 90 + 1 # 1=background
+        self.class_num: int = 90 + 0 # 1=background
         self.augmentation: bool = False
         self.augment_num: int = 1
                                                                          
@@ -30,6 +30,8 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 100
-        self.epochs: int = 1000
-        self.batch_size: int = 8
+        self.epochs: int = 100
+        self.batch_size: int = 48
         self.learning_rate: float = 0.0001
+        self.step_show: int = 10
+        self.device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")

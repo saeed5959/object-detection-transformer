@@ -3,8 +3,9 @@ from torch import nn
 from torch.nn.functional import layer_norm, relu
 from einops import rearrange
 
-from core.settings import model_config
+from core.settings import model_config, train_config
 
+device = train_config.device
 
 class LinearProjection(nn.Module):
     def __init__(self):
@@ -68,7 +69,7 @@ class LinearProjection(nn.Module):
     def position_embedding(self, x):
         #using a learnable 1D-embedding in a raster order
         batch_number, patch_number, dim_size = x.size()
-        pos = torch.arange(patch_number).repeat(batch_number,1)
+        pos = torch.arange(patch_number).repeat(batch_number,1).to(device)
         out = self.pos_embed(pos)
 
         return out

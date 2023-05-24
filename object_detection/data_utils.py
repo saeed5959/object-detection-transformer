@@ -28,27 +28,40 @@ class DatasetObjectDetection(Dataset):
         data_list = data_list[1:]
         bbox = []
         class_id = []
-        class_mask = []
+        obj_id = []
+        mask = []
         for patch in data_list:
             c, x, y, w, h = patch.split(",")
             c, x, y, w, h = int(c), float(x), float(y), float(w), float(h)            
             bbox.append([x, y, w, h])
-            #label smoothing
-            label_smoothing = np.abs(np.random.normal(0,0.05))
-            patch_class = np.eye(model_config.class_num)[c]
-            patch_class[c] = patch_class[c] - label_smoothing 
-            class_id.append(patch_class)
-            class_mask.append([c])
+            
+            if c==0:
+                obj_id.append(0)
+                patch_class = np.zeros(model_config.class_num)
+                class_id.append(patch_class)
+                mask.append([0])
+            else:
+                obj_id.append(1)
+                patch_class = np.eye(model_config.class_num)[c-1]
+
+                #label smoothing
+                #label_smoothing = np.abs(np.random.normal(0,0.05))
+                #patch_class[c] = patch_class[c] - label_smoothing 
+
+                class_id.append(patch_class)
+                mask.append([1])
 
         bbox = torch.Tensor(np.array(bbox))
+        obj_id = torch.Tensor(np.array(obj_id))
         class_id = torch.Tensor(np.array(class_id))
-        class_mask = torch.Tensor(np.array(class_mask))
+        mask_class = torch.Tensor(np.array(mask)).repeat(1,model_config.class_num)
+        mask_bbox = torch.Tensor(np.array(mask)).repeat(1,4)
 
         #augmentation
         if augment:
             img, class_id, bbox, class_mask = self.transform(img, class_id, bbox, class_mask)
 
-        return img, class_id, bbox, class_mask
+        return img, obj_id, class_id, bbox, mask_class, mask_bbox
     
     def __getitem__(self,index):
         if self.model_config.augmentation:

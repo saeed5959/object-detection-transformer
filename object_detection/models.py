@@ -13,7 +13,7 @@ class VitModel(nn.Module):
     def forward(self, x):
         linear_out = self.linear_block(x)
         transformer_out = self.transformer_block(linear_out)
-        class_out, box_out = self.head_block(transformer_out)
+        class_out = self.head_block(transformer_out)
 
-        return class_out, box_out
+        return class_out
 
