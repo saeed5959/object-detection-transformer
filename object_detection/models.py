@@ -3,8 +3,9 @@ from torch import nn
 from torch.nn.functional import sigmoid, softmax
 
 from object_detection import linear_patch, transformer, head
-from core.settings import model_config
+from core.settings import model_config, train_config
 
+device = train_config.device
 
 class VitModel(nn.Module):
     def __init__(self):
@@ -32,7 +33,7 @@ class VitModel(nn.Module):
         class_out = softmax(out[:,:,1:model_config.class_num+1], dim=-1)
         #bound [0,1] for bbox
         box_out = out[:,:,model_config.class_num+1:]
-        box_out = torch.minimum(torch.Tensor([1]), torch.maximum(torch.Tensor([0]), box_out))
+        box_out = torch.minimum(torch.Tensor([1]).to(device), torch.maximum(torch.Tensor([0]).to(device), box_out))
 
         return obj_out, class_out, box_out
 
