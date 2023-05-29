@@ -18,7 +18,7 @@ def main(training_files:str, model_path:str, pretrained: str):
     train_loader = DataLoader(train_dataset, num_workers=4, shuffle=True,
                               batch_size=train_config.batch_size)
 
-    model = models.VitModel()
+    model = models.VitModel().to(device)
     if pretrained != "":
         model = load_pretrained(model, pretrained, device)
         print("pretrained model loaded!")
@@ -26,12 +26,15 @@ def main(training_files:str, model_path:str, pretrained: str):
         print("pretrained model didn't load!")
 
     optim = torch.optim.AdamW(model.parameters(), train_config.learning_rate)
-    loss_class = nn.CrossEntropyLoss()
-    loss_box = nn.MSELoss()    
+    #combination of sigmoid and nll loss for 
     loss_obj = nn.BCEWithLogitsLoss()
+    #combination of softmax and nll loss
+    loss_class = nn.CrossEntropyLoss(reduction="sum")
+    #we use "sum" instead of "mean" : because of mask
+    loss_box = nn.MSELoss(reduction="sum")    
     model.train()
-    model.to(device)
     
+    step_all = 0
     for epoch in range(1, train_config.epochs+1):
         print(f"===<< EPOCH : {epoch}  >>====")
         loss_obj_all = 0
@@ -44,12 +47,24 @@ def main(training_files:str, model_path:str, pretrained: str):
             
             out = model(img)
             
+            #loss object
             loss_obj_out = loss_obj(out[:,:,0], obj_id)
 
-            loss_class_out = loss_class(out[:,:,1:model_config.class_num+1]*mask_class, class_input*mask_class)
+            #loss class with mask
+            class_out = out[:,:,1:model_config.class_num+1]*mask_class
+            loss_class_out = loss_class(class_out, class_input*mask_class)
+            #normalize
+            loss_class_out = loss_class_out / torch.sum(mask_class) * model_config.class_num
             
-            loss_box_out = loss_box(out[:,:,model_config.class_num+1:]*mask_bbox, bbox_input*mask_bbox)
+            #loss bbox with mask
+            box_out = out[:,:,model_config.class_num+1:]*mask_bbox
+            #bounding box between [0,1]
+            box_out = torch.minimum(torch.Tensor([1]), torch.maximum(torch.Tensor([0]), box_out))
+            loss_box_out = loss_box(box_out, bbox_input*mask_bbox)
+            #normalize
+            loss_box_out = loss_box_out / torch.sum(mask_bbox) * 4
             
+
             loss_all = loss_obj_out + loss_box_out + loss_class_out
         
             optim.zero_grad()
@@ -61,14 +76,15 @@ def main(training_files:str, model_path:str, pretrained: str):
             loss_bbox_all += loss_box_out
 
             if step % train_config.step_show == 0:
+                step_all += step
                 #writing in tensorboard
                 loss_obj_all = loss_obj_all / train_config.step_show
                 loss_class_all = loss_class_all / train_config.step_show
                 loss_bbox_all = loss_bbox_all / train_config.step_show
 
-                writer.add_scalar("loss_obj", loss_obj_all, step)
-                writer.add_scalar("loss_class", loss_class_all, step)
-                writer.add_scalar("loss_box", loss_bbox_all, step)
+                writer.add_scalar("loss_obj", loss_obj_all, step_all)
+                writer.add_scalar("loss_class", loss_class_all, step_all)
+                writer.add_scalar("loss_box", loss_bbox_all, step_all)
 
                 #printing loss
                 print(f"===<< STEP : {step}  >>====")
@@ -79,5 +95,5 @@ def main(training_files:str, model_path:str, pretrained: str):
                 loss_bbox_all = 0
 
         if epoch % train_config.save_model == 0:
-            torch.save(model, model_path)
+            torch.save(model.state_dict(), model_path)
 
