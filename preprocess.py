@@ -3,6 +3,7 @@ import os
 import cv2
 import numpy as np
 from tqdm import tqdm
+from multiprocessing import Pool
 
 from core.settings import model_config
 
@@ -121,7 +122,30 @@ def patch_info(img_path: str, segment: object, data_list: list, color_list: list
 
     return patch_data
 
+def multi_proc(annot):
 
+    data_file_out = []
+
+    dataset_folder_path = os.path.join(os.path.dirname(__file__),"dataset")
+    file_path = os.path.join(dataset_folder_path,"annotations","panoptic_train2017.json")
+    segment_folder_path =  os.path.join(dataset_folder_path,"annotations","panoptic_train2017")
+    img_folder_path =  os.path.join(dataset_folder_path,"train2017")
+    img_folder_path_out = os.path.join(dataset_folder_path,"train2017_out")
+
+    for data in tqdm(annot):
+
+        img_path = os.path.join(img_folder_path, data["file_name"][:-3]+"jpg")
+        segment_path = os.path.join(segment_folder_path, data["file_name"])
+        img_path_out = os.path.join(img_folder_path_out, data["file_name"][:-3]+"jpg")
+        img_preprocess(img_path, img_path_out)
+
+        data_list, color_list, segment = color_object_segment(segment_path, data["segments_info"])
+        patch_data = patch_info(img_path_out, segment, data_list, color_list)
+        data_file_out.append(patch_data)
+
+    return data_file_out
+
+        
 def main():
 
     dataset_folder_path = os.path.join(os.path.dirname(__file__),"dataset")
@@ -135,21 +159,22 @@ def main():
 
     # list of dict : [{'segments_info', 'file_name', 'image_id'},...]
     annotations = data_file_in["annotations"] 
-    data_file_out = []
+    
+    len_annot = len(annotations)
+    annot = []
+    num_cpu = 10
+    for counter in range(num_cpu):
+        annot.append(annotations[int(counter*len_annot/num_cpu/20):int((counter+1)*len_annot/num_cpu/20)])
 
-    for data in tqdm(annotations):
+    with Pool(3) as p:
+        data_file_out = p.map(multi_proc, annot)
 
-        img_path = os.path.join(img_folder_path, data["file_name"][:-3]+"jpg")
-        segment_path = os.path.join(segment_folder_path, data["file_name"])
-        img_path_out = os.path.join(img_folder_path_out, data["file_name"][:-3]+"jpg")
-        img_preprocess(img_path, img_path_out)
-
-        data_list, color_list, segment = color_object_segment(segment_path, data["segments_info"])
-        patch_data = patch_info(img_path_out, segment, data_list, color_list)
-        data_file_out.append(patch_data)
+    data_file_out_all = []
+    for m in data_file_out:
+        data_file_out_all += m
 
     file_path_out = os.path.join(dataset_folder_path,"dataset_file_out.txt")
-    save_file(file_path_out, data_file_out)
+    save_file(file_path_out, data_file_out_all)
 
     return
 
