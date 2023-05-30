@@ -31,39 +31,73 @@ def normalize_bbox(bbox: list, height: int, width: int):
 
     return c_x, c_y, w, h
 
-def find_most_repetitive(data):
+def find_num_color(segment):
 
-    most_repetitive_value = []
-    for rgb in range(3):
-        unique_values, counts = np.unique(data[:,:,rgb], return_counts=True)
+    unique_values, counts = np.unique(segment.reshape(-1,3), axis=0, return_counts=True)
+    num_color = [unique_values.tolist(), counts.tolist()]
+
+    return num_color
+
+def find_most_repetitive_box(data, num_color):
+
+    unique_values_all, counts_all = num_color[0], num_color[1]
+    unique_values, counts = np.unique(data.reshape(-1,3), axis=0, return_counts=True)
+    
+    for i in range(len(unique_values)):
         max_index = np.argmax(counts)
-        most_repetitive_value.append(unique_values[max_index])
+        most_repetitive_value = unique_values[max_index].tolist()
+
+        if counts_all[unique_values_all.index(most_repetitive_value)] < 1.1*counts[max_index]:
+            break
+        else:
+            counts[max_index] = 0
+            most_repetitive_value = 0
 
     return most_repetitive_value
 
+def find_most_repetitive_patch(data, color_list):
+
+    unique_values, counts = np.unique(data.reshape(-1,3), axis=0, return_counts=True)
+
+    for i in range(len(unique_values)):
+        max_index = np.argmax(counts)
+        most_repetitive_value = unique_values[max_index].tolist()
+
+        if most_repetitive_value in color_list:
+            return most_repetitive_value
+        else:
+            counts[max_index] = 0
+
+    most_repetitive_value = [0,0,0]
+
+    return most_repetitive_value
 
 def color_object_segment(segment_path: str, data: list):
 
     data_list = []
     color_list = []
     segment = cv2.imread(segment_path)
+
+    num_color = find_num_color(segment)
     for box in data:
         if box["category_id"] < model_config.class_num:
             bbox = box["bbox"]
             c0_x, c0_y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
             segment_box = segment[c0_y:c0_y+h ,c0_x:c0_x+w]
             
-            color = find_most_repetitive(segment_box)
-            color_list.append(color)
-            data_list.append({"category_id":box["category_id"], "bbox":box["bbox"]})
+            color = find_most_repetitive_box(segment_box, num_color)
+            if color!=[0,0,0]:
+                color_list.append(color)
+                data_list.append({"category_id":box["category_id"], "bbox":box["bbox"]})
+            else:
+                print("find box with 000 \n")
 
-    return data_list, color_list
+    return data_list, color_list, segment
 
 
-def patch_info(img_path: str, segment_path: str, data_list: list, color_list: list):
+def patch_info(img_path: str, segment: object, data_list: list, color_list: list):
 
     patch_num_h = model_config.patch_num_h
-    segment = cv2.imread(segment_path)
     height, width, _ = segment.shape
     step_size_height = height/patch_num_h
     step_size_width = width/patch_num_h
@@ -73,13 +107,13 @@ def patch_info(img_path: str, segment_path: str, data_list: list, color_list: li
     for h in range(patch_num_h):
         for w in range(patch_num_h):
             segment_box = segment[int(h*step_size_height):int((h+1)*step_size_height),int(w*step_size_width):int((w+1)*step_size_width)]
-            color = find_most_repetitive(segment_box)
+            color = find_most_repetitive_patch(segment_box, color_list)
 
             if color in color_list:
                 color_index = color_list.index(color)
                 category_id, bbox = data_list[color_index]["category_id"], data_list[color_index]["bbox"]
-                c_x, c_y, w, h = normalize_bbox(bbox, height, width)
-                patch_data += "|" + str(category_id) + "," + str(c_x) + "," + str(c_y) + "," + str(w) + "," + str(h)
+                c_x, c_y, w_norm, h_norm = normalize_bbox(bbox, height, width)
+                patch_data += "|" + str(category_id) + "," + str(c_x) + "," + str(c_y) + "," + str(w_norm) + "," + str(h_norm)
 
             else:
                 patch_data += "|" + str(background_id) + "," + str(0) + "," + str(0) + "," + str(0) + "," + str(0)
@@ -102,6 +136,7 @@ def main():
     # list of dict : [{'segments_info', 'file_name', 'image_id'},...]
     annotations = data_file_in["annotations"] 
     data_file_out = []
+
     for data in tqdm(annotations):
 
         img_path = os.path.join(img_folder_path, data["file_name"][:-3]+"jpg")
@@ -109,8 +144,8 @@ def main():
         img_path_out = os.path.join(img_folder_path_out, data["file_name"][:-3]+"jpg")
         img_preprocess(img_path, img_path_out)
 
-        data_list, color_list = color_object_segment(segment_path, data["segments_info"])
-        patch_data = patch_info(img_path_out, segment_path, data_list, color_list)
+        data_list, color_list, segment = color_object_segment(segment_path, data["segments_info"])
+        patch_data = patch_info(img_path_out, segment, data_list, color_list)
         data_file_out.append(patch_data)
 
     file_path_out = os.path.join(dataset_folder_path,"dataset_file_out.txt")
