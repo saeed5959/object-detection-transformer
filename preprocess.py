@@ -164,7 +164,7 @@ def main():
     annot = []
     num_cpu = 10
     for counter in range(num_cpu):
-        annot.append(annotations[int(counter*len_annot/num_cpu/20):int((counter+1)*len_annot/num_cpu/20)])
+        annot.append(annotations[int(counter*len_annot/num_cpu):int((counter+1)*len_annot/num_cpu)])
 
     with Pool(3) as p:
         data_file_out = p.map(multi_proc, annot)
