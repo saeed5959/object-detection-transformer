@@ -125,10 +125,10 @@ def patch_info(img_path: str, segment: object, data_list: list, color_list: list
 def main():
 
     dataset_folder_path = os.path.join(os.path.dirname(__file__),"dataset")
-    file_path = os.path.join(dataset_folder_path,"annotations","panoptic_val2017.json")
-    segment_folder_path =  os.path.join(dataset_folder_path,"annotations","panoptic_val2017")
-    img_folder_path =  os.path.join(dataset_folder_path,"val2017")
-    img_folder_path_out = os.path.join(dataset_folder_path,"val2017_out")
+    file_path = os.path.join(dataset_folder_path,"annotations","panoptic_train2017.json")
+    segment_folder_path =  os.path.join(dataset_folder_path,"annotations","panoptic_train2017")
+    img_folder_path =  os.path.join(dataset_folder_path,"train2017")
+    img_folder_path_out = os.path.join(dataset_folder_path,"train2017_out")
 
     with open(file_path) as file:
         data_file_in = json.load(file)
