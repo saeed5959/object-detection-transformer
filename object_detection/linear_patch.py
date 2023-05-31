@@ -39,12 +39,12 @@ class LinearProjection(nn.Module):
     def forward(self, x):
         if self.source:
             x = self.divide_patch(x,downsample=1)
-            x = layer_norm(x, [x.size()[-2], x.size()[-1]])
+            x = layer_norm(x, [x.size()[-3], x.size()[-2], x.size()[-1]])
             x = self.linear(x)
             
         else:
             x = self.resnet(x)
-            x = layer_norm(x, [x.size()[-2], x.size()[-1]])
+            x = layer_norm(x, [x.size()[-3], x.size()[-2], x.size()[-1]])
             x = self.divide_patch(x, downsample=4)
             
         pos = self.position_embedding(x)
