@@ -75,7 +75,7 @@ class MultiHeadAttention(nn.Module):
         K_linear = rearrange(K_linear, 'b n (h d) -> b h n d', h = self.head_num)
         Q_linear = rearrange(Q_linear, 'b n (h d) -> b h n d', h = self.head_num)
         
-        out = torch.matmul(softmax(torch.matmul(Q_linear, V_linear.transpose(2,3))/torch.sqrt(torch.tensor(self.dim)), dim=-1), V_linear)
+        out = torch.matmul(softmax(torch.matmul(Q_linear, K_linear.transpose(2,3))/torch.sqrt(torch.tensor(self.dim)), dim=-1), V_linear)
 
         #back reshaping from multihead
         out = rearrange(out, 'b h n d -> b n (h d)')
