@@ -1,5 +1,7 @@
 dataset/
 
+pretrain/
+
 __pycache__/
 
 runs/

@@ -20,6 +20,7 @@ class ModelConfig:
         self.class_num: int = 90 
         self.augmentation: bool = False
         self.augment_num: int = 1
+        self.iou_thresh: float = 0.4
                                                                          
 
 
