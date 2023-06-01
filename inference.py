@@ -25,6 +25,13 @@ def inference_test(img_path : str, model_path : str):
 
     #out_nms = nms_img(out)
 
+    #sigmoid for object
+    # obj_out = sigmoid(out[:,:,0])
+    # #softmax for class
+    # class_out = softmax(out[:,:,1:model_config.class_num+1], dim=-1)
+    # #bound [0,1] for bbox
+    # box_out = out[:,:,model_config.class_num+1:]
+    # box_out = torch.minimum(torch.Tensor([1]).to(device), torch.maximum(torch.Tensor([0]).to(device), box_out))
 
     return obj_out[0].detach().numpy(), class_out[0].detach().numpy(), box_out[0].detach().numpy()
 
