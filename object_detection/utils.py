@@ -49,7 +49,9 @@ def nms_img(obj_out, class_out, box_out):
     #making possible bbox
     for patch in range(len(obj_out)):
         obj_score = obj_out[patch]
-        if  obj_score > 0.5:
+        class_id = np.argmax(class_out[patch])
+        class_score = class_out[patch][class_id]
+        if  obj_score > 0.6:
             obj_score_list.append(obj_score)
 
             x = patch % 2
@@ -103,7 +105,7 @@ def nms_img(obj_out, class_out, box_out):
 # box_out = np.array([[0.2,0.2,0.1,0.1],[0,0,0,0.1],[0.5,0.5,0.2,0.2],[0.55,0.5,0.2,0.2]])
 # print(nms_img(obj_out, class_out, box_out))
 
-def show_box(img_path, class_list, box_list):
+def show_box(img_path, class_list, box_list, out_path):
     img = cv2.imread(img_path)
     h, w, c = img.shape
     color = (255,255,255)
@@ -111,4 +113,4 @@ def show_box(img_path, class_list, box_list):
     for box in box_list:
         cv2.rectangle(img, (int((box[0] - box[2]/2)*w), int((box[1] - box[3]/2)*h)), (int((box[0] + box[2]/2)*w), int((box[1] + box[3]/2)*h)), color, thickness)
 
-    cv2.imwrite("./out.jpg",img)
+    cv2.imwrite(out_path,img)
