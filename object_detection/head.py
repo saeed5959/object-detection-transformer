@@ -22,4 +22,4 @@ class HeadDetect(nn.Module):
         out = self.linear_class_1(x_and_similarity)
         out = self.linear_class_2(out)
 
-        return out
+        return out, similarity_matrix

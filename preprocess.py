@@ -114,10 +114,10 @@ def patch_info(img_path: str, segment: object, data_list: list, color_list: list
                 color_index = color_list.index(color)
                 category_id, bbox = data_list[color_index]["category_id"], data_list[color_index]["bbox"]
                 c_x, c_y, w_norm, h_norm = normalize_bbox(bbox, height, width)
-                patch_data += "|" + str(category_id) + "," + str(c_x) + "," + str(c_y) + "," + str(w_norm) + "," + str(h_norm)
+                patch_data += "|" + str(category_id) + "," + str(c_x) + "," + str(c_y) + "," + str(w_norm) + "," + str(h_norm) + "," + str(color[0]) + "," + str(color[1]) + "," + str(color[2])
 
             else:
-                patch_data += "|" + str(background_id) + "," + str(0) + "," + str(0) + "," + str(0) + "," + str(0)
+                patch_data += "|" + str(background_id) + "," + str(0) + "," + str(0) + "," + str(0) + "," + str(0) + "," + str(0) + "," + str(0) + "," + str(0)
 
 
     return patch_data

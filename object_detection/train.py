@@ -32,6 +32,8 @@ def main(training_files:str, model_path:str, pretrained: str):
     loss_class = nn.CrossEntropyLoss(reduction="sum")
     #we use "sum" instead of "mean" : because of mask
     loss_box = nn.MSELoss(reduction="sum")    
+    #loss poa
+    # loss_poa = nn.NLLLoss()
     model.train()
     
     step_all = 0
@@ -45,7 +47,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             img, bbox_input, class_input, obj_id = img.to(device), bbox_input.to(device), class_input.to(device), obj_id.to(device)
             mask_class, mask_bbox = mask_class.to(device), mask_bbox.to(device)
             
-            out = model(img)
+            out, similarity_matrix = model(img)
             
             #loss object
             loss_obj_out = loss_obj(out[:,:,0], obj_id)
@@ -64,6 +66,8 @@ def main(training_files:str, model_path:str, pretrained: str):
             #normalize
             loss_box_out = loss_box_out / torch.sum(mask_bbox) * 4
             
+            #loss poa
+
 
             loss_all = loss_obj_out + loss_box_out + loss_class_out
         

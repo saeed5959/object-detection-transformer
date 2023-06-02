@@ -17,15 +17,15 @@ class VitModel(nn.Module):
     def forward(self, x):
         linear_out = self.linear_block(x)
         transformer_out = self.transformer_block(linear_out)
-        out = self.head_block(transformer_out)
+        out, similarity_matrix = self.head_block(transformer_out)
 
-        return out
+        return out, similarity_matrix
     
     def inference(self, x):
         #model output
         linear_out = self.linear_block(x)
         transformer_out = self.transformer_block(linear_out)
-        out = self.head_block(transformer_out)
+        out, similarity_matrix = self.head_block(transformer_out)
 
         #sigmoid for object
         obj_out = sigmoid(out[:,:,0])
