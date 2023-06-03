@@ -33,7 +33,8 @@ def main(training_files:str, model_path:str, pretrained: str):
     #we use "sum" instead of "mean" : because of mask
     loss_box = nn.MSELoss(reduction="sum")    
     #loss poa
-    # loss_poa = nn.NLLLoss()
+    loss_poa = nn.BCELoss(reduction="sum")
+
     model.train()
     
     step_all = 0
@@ -42,10 +43,11 @@ def main(training_files:str, model_path:str, pretrained: str):
         loss_obj_all = 0
         loss_class_all = 0
         loss_bbox_all = 0
+        loss_poa_all = 0
 
-        for step, (img, obj_id, class_input, bbox_input, mask_class, mask_bbox) in enumerate(train_loader):
-            img, bbox_input, class_input, obj_id = img.to(device), bbox_input.to(device), class_input.to(device), obj_id.to(device)
-            mask_class, mask_bbox = mask_class.to(device), mask_bbox.to(device)
+        for step, (img, obj_id, class_input, bbox_input, poa_input, mask_poa, mask_class, mask_bbox) in enumerate(train_loader):
+            img, bbox_input, class_input, obj_id, poa_input = img.to(device), bbox_input.to(device), class_input.to(device), obj_id.to(device), poa_input.to(device)
+            mask_class, mask_bbox, mask_poa = mask_class.to(device), mask_bbox.to(device), mask_poa.to(device)
             
             out, similarity_matrix = model(img)
             
@@ -67,9 +69,11 @@ def main(training_files:str, model_path:str, pretrained: str):
             loss_box_out = loss_box_out / torch.sum(mask_bbox) * 4
             
             #loss poa
+            loss_poa_out = loss_poa(similarity_matrix*mask_poa, poa_input*mask_poa)
+            #normalize
+            loss_poa_out = loss_poa_out / torch.sum(poa_input)
 
-
-            loss_all = loss_obj_out + loss_box_out + loss_class_out
+            loss_all = loss_obj_out + loss_box_out + loss_class_out + loss_poa_out
         
             optim.zero_grad()
             loss_all.backward()
@@ -78,6 +82,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             loss_obj_all += loss_obj_out
             loss_class_all += loss_class_out
             loss_bbox_all += loss_box_out
+            loss_poa_all += loss_poa_out
 
             if step % train_config.step_show == 0:
                 step_all += step
@@ -85,18 +90,21 @@ def main(training_files:str, model_path:str, pretrained: str):
                 loss_obj_all = loss_obj_all / train_config.step_show
                 loss_class_all = loss_class_all / train_config.step_show
                 loss_bbox_all = loss_bbox_all / train_config.step_show
+                loss_poa_all = loss_poa_all / train_config.step_show
 
                 writer.add_scalar("loss_obj", loss_obj_all, step_all)
                 writer.add_scalar("loss_class", loss_class_all, step_all)
                 writer.add_scalar("loss_box", loss_bbox_all, step_all)
+                writer.add_scalar("loss_poa", loss_poa_all, step_all)
 
                 #printing loss
                 print(f"===<< STEP : {step}  >>====")
-                print(f'loss_obj : {loss_obj_out} , loss_class : {loss_class_out} , loss_box : {loss_box_out}')
+                print(f'loss_obj : {loss_obj_all} , loss_class : {loss_class_all} , loss_box : {loss_bbox_all} , loss_poa : {loss_poa_all}')
 
                 loss_obj_all = 0
                 loss_class_all = 0
                 loss_bbox_all = 0
+                loss_poa_all = 0
 
         if epoch % train_config.save_model == 0:
             torch.save(model.state_dict(), model_path)

@@ -2,7 +2,9 @@ import torch
 from torch import nn
 from torch.nn.functional import softmax, relu
 
-from core.settings import model_config
+from core.settings import model_config, train_config
+
+device = train_config.device
 
 class HeadDetect(nn.Module):
     def __init__(self):
@@ -15,8 +17,9 @@ class HeadDetect(nn.Module):
 
     def forward(self, x):
         #similarity_matrix = softmax(torch.matmul(x, x.transpose(1,2)), dim=-1)
-        similarity_matrix = relu(torch.matmul(x, x.transpose(1,2)) / self.patch_num)
-        similarity_matrix = torch.minimum(similarity_matrix,torch.Tensor([1]))
+        similarity_matrix = torch.matmul(x, x.transpose(1,2)) / self.patch_num
+        #putting between (0,1)
+        similarity_matrix = torch.minimum(torch.Tensor([1]).to(device), torch.maximum(torch.Tensor([0]).to(device), similarity_matrix))
         x_and_similarity = torch.cat((x, similarity_matrix), dim=-1)
 
         out = self.linear_class_1(x_and_similarity)

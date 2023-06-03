@@ -30,19 +30,25 @@ class DatasetObjectDetection(Dataset):
         class_id = []
         obj_id = []
         mask = []
+        poa = []
+
+        patch_class_zero = np.zeros(model_config.class_num)
+        patch_class_eye = np.eye(model_config.class_num)
+
         for patch in data_list:
-            c, x, y, w, h = patch.split(",")
-            c, x, y, w, h = int(c), float(x), float(y), float(w), float(h)            
+            c, x, y, w, h, r, g, b = patch.split(",")
+            c, x, y, w, h, r, g, b = int(c), float(x), float(y), float(w), float(h), int(r), int(g), int(b)            
             bbox.append([x, y, w, h])
+            poa.append((r,g,b))
             
             if c==0:
                 obj_id.append(0)
-                patch_class = np.zeros(model_config.class_num)
-                class_id.append(patch_class)
+                class_id.append(patch_class_zero)
                 mask.append([0])
+                
             else:
                 obj_id.append(1)
-                patch_class = np.eye(model_config.class_num)[c-1]
+                patch_class = patch_class_eye[c-1]
 
                 #label smoothing
                 #label_smoothing = np.abs(np.random.normal(0,0.05))
@@ -51,17 +57,31 @@ class DatasetObjectDetection(Dataset):
                 class_id.append(patch_class)
                 mask.append([1])
 
+
+        poa_matrix = self.make_poa_matrix(poa)
+
         bbox = torch.Tensor(np.array(bbox))
         obj_id = torch.Tensor(np.array(obj_id))
         class_id = torch.Tensor(np.array(class_id))
+        poa_matrix = torch.Tensor(np.array(poa_matrix))
         mask_class = torch.Tensor(np.array(mask)).repeat(1,model_config.class_num)
         mask_bbox = torch.Tensor(np.array(mask)).repeat(1,4)
+        mask_poa = torch.Tensor(np.array(mask)).repeat(1,model_config.patch_num)
 
         #augmentation
         if augment:
             img, class_id, bbox, class_mask = self.transform(img, class_id, bbox, class_mask)
 
-        return img, obj_id, class_id, bbox, mask_class, mask_bbox
+        return img, obj_id, class_id, bbox, poa_matrix, mask_poa, mask_class, mask_bbox
+    
+    def make_poa_matrix(self, poa):
+        poa_matrix = np.zeros((model_config.patch_num, model_config.patch_num))
+
+        for index in range(len(poa)):
+            arg_place = np.where(poa[index]==np.array(poa))
+            poa_matrix[index,arg_place] = 1
+
+        return  poa_matrix
     
     def __getitem__(self,index):
         if self.model_config.augmentation:
