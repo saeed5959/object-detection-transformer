@@ -31,7 +31,7 @@ class TrainConfig:
     def __init__(self):
         self.save_model: int = 100
         self.epochs: int = 100
-        self.batch_size: int = 48
+        self.batch_size: int = 32
         self.learning_rate: float = 0.0001
         self.step_show: int = 100
         self.device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
