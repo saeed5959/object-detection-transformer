@@ -11,12 +11,11 @@ class ModelConfig:
     def __init__(self):
         self.height: int = 256
         self.width: int = 256
-        self.dim: int = 768
+        self.dim: int = 512
         self.head_num: int = 2
         self.patch_size: int = 16
         self.patch_num: int = 256
         self.patch_num_h: int = 16
-        self.source: bool = False
         self.class_num: int = 90 
         self.augmentation: bool = False
         self.augment_num: int = 1
