@@ -18,7 +18,7 @@ class HeadDetect(nn.Module):
         #similarity_matrix = softmax(torch.matmul(x, x.transpose(1,2)), dim=-1)
         similarity_matrix = torch.matmul(x, x.transpose(1,2)) / self.patch_num
         #putting between (0,1)
-        similarity_matrix = torch.minimum(torch.tensor([1]), torch.maximum(torch.tensor([0]), similarity_matrix))
+        similarity_matrix = torch.minimum(torch.tensor([1]).to(device), torch.maximum(torch.tensor([0]).to(device), similarity_matrix))
 
         #you can make 0 for the values between (0,0.5)
 

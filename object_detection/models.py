@@ -33,7 +33,7 @@ class VitModel(nn.Module):
         class_out = softmax(out[:,:,1:model_config.class_num+1], dim=-1)
         #bound [0,1] for bbox
         box_out = out[:,:,model_config.class_num+1:]
-        box_out = torch.minimum(torch.tensor([1]), torch.maximum(torch.tensor([0]), box_out))
+        box_out = torch.minimum(torch.tensor([1]).to(device), torch.maximum(torch.tensor([0]).to(device), box_out))
 
         return obj_out, class_out, box_out
 
