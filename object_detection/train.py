@@ -63,7 +63,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             #loss bbox with mask
             box_out = out[:,:,model_config.class_num+1:]*mask_bbox
             #bounding box between [0,1]
-            box_out = torch.minimum(torch.Tensor([1]).to(device), torch.maximum(torch.Tensor([0]).to(device), box_out))
+            box_out = torch.minimum(torch.tensor([1]), torch.maximum(torch.tensor([0]), box_out))
             loss_box_out = loss_box(box_out, bbox_input*mask_bbox)
             #normalize
             loss_box_out = loss_box_out / torch.sum(mask_bbox) * 4
