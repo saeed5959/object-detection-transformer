@@ -25,7 +25,7 @@ class SelfAttention_me(nn.Module):
         Q = x
         Q_linear = self.linear_1(Q)
 
-        out = torch.matmul(softmax(torch.matmul(Q_linear, K_linear.transpose(1,2))/torch.sqrt(torch.tensor(self.dim)), dim=-1), V_linear)
+        out = torch.matmul(softmax(torch.matmul(Q_linear, K_linear.transpose(1,2))/torch.sqrt(torch.tensor(self.dim).to(device)), dim=-1), V_linear)
 
         return out
 
