@@ -22,30 +22,37 @@ class LinearProjection(nn.Module):
             nn.BatchNorm2d(64),
         )
         self.conv2d_2 =nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=3, padding='same'),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, padding='same'),
+            nn.BatchNorm2d(64),
+        )
+        self.conv2d_3 =nn.Sequential(
             nn.Conv2d(64, 128, kernel_size=3, padding='same'),
             nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.Conv2d(128, 128, kernel_size=3, padding='same'),
             nn.BatchNorm2d(128),
         )
-        self.conv2d_3 =nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, padding='same'),
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-            nn.Conv2d(256, 256, kernel_size=3, padding='same'),
-            nn.BatchNorm2d(256),
-        )
         self.conv2d_4 =nn.Sequential(
-            nn.Conv2d(256, 256, kernel_size=3, padding='same'),
+            nn.Conv2d(128, 128, kernel_size=3, padding='same'),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.Conv2d(128, 128, kernel_size=3, padding='same'),
+            nn.BatchNorm2d(128),
+        )
+        self.conv2d_5 =nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, padding='same'),
             nn.BatchNorm2d(256),
             nn.ReLU(),
             nn.Conv2d(256, 384, kernel_size=7, padding='same'),
             nn.BatchNorm2d(384),
         )
         self.conv1d_1 = nn.Conv2d(3, 64, kernel_size=1, padding='same')
-        self.conv1d_2 = nn.Conv2d(64, 128, kernel_size=1, padding='same')
-        self.conv1d_3 = nn.Conv2d(128, 256, kernel_size=1, padding='same')
-        self.conv1d_4 = nn.Conv2d(256, 384, kernel_size=1, padding='same')
+        self.conv1d_2 = nn.Conv2d(64, 64, kernel_size=1, padding='same')
+        self.conv1d_3 = nn.Conv2d(64, 128, kernel_size=1, padding='same')
+        self.conv1d_4 = nn.Conv2d(128, 128, kernel_size=1, padding='same')
         self.maxpool_1 = nn.MaxPool2d(2)
         self.maxpool_2 = nn.MaxPool2d(2)
         self.maxpool_3 = nn.MaxPool2d(2)
@@ -82,7 +89,9 @@ class LinearProjection(nn.Module):
         x_conv2d_4 = self.conv2d_4(x_maxpool_3)
         x_maxpool_4 = self.maxpool_4(relu(x_conv2d_4 + self.conv1d_4(x_maxpool_3)))
 
-        return x_maxpool_4
+        x_conv2d_5 = self.conv2d_5(x_maxpool_4)
+
+        return x_conv2d_5
     
     def position_embedding(self, x):
         #using a learnable 1D-embedding in a raster order

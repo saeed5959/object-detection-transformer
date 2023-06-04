@@ -39,7 +39,10 @@ def main(training_files:str, model_path:str, pretrained: str):
     model.train()
     
     step_all = 0
+    epo = torch.tensor([0]).to(device)
+
     for epoch in range(1, train_config.epochs+1):
+        epo += 1
         print(f"===<< EPOCH : {epoch}  >>====")
         loss_obj_all = 0
         loss_class_all = 0
@@ -50,7 +53,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             img, bbox_input, class_input, obj_id, poa_input = img.to(device), bbox_input.to(device), class_input.to(device), obj_id.to(device), poa_input.to(device)
             mask_class, mask_bbox, mask_poa = mask_class.to(device), mask_bbox.to(device), mask_poa.to(device)
             
-            out, similarity_matrix = model(img, poa_input, torch.Tensor(epoch).to(device))
+            out, similarity_matrix = model(img, poa_input, epo)
             
             #loss object
             loss_obj_out = loss_obj(out[:,:,0], obj_id)
