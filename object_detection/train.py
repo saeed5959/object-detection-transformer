@@ -29,7 +29,7 @@ def main(training_files:str, model_path:str, pretrained: str):
     #combination of sigmoid and nll loss for 
     loss_obj = nn.BCEWithLogitsLoss()
     #combination of softmax and nll loss
-    class_weight = noraml_weight(model_config.panoptic_file_path)
+    class_weight = noraml_weight(model_config.panoptic_file_path).to(device)
     loss_class = nn.CrossEntropyLoss(weight=class_weight, reduction="sum")
     #we use "sum" instead of "mean" : because of mask
     loss_box = nn.MSELoss(reduction="sum")    
