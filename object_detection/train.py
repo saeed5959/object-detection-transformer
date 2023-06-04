@@ -6,7 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 from object_detection import models
 from core.settings import train_config, model_config
 from object_detection.data_utils import DatasetObjectDetection, augmentation
-from object_detection.utils import load_pretrained
+from object_detection.utils import load_pretrained, noraml_weight
 
 device = train_config.device
 
@@ -29,7 +29,8 @@ def main(training_files:str, model_path:str, pretrained: str):
     #combination of sigmoid and nll loss for 
     loss_obj = nn.BCEWithLogitsLoss()
     #combination of softmax and nll loss
-    loss_class = nn.CrossEntropyLoss(reduction="sum")
+    class_weight = noraml_weight(model_config.panoptic_file_path)
+    loss_class = nn.CrossEntropyLoss( reduction="sum")
     #we use "sum" instead of "mean" : because of mask
     loss_box = nn.MSELoss(reduction="sum")    
     #loss poa
@@ -56,7 +57,7 @@ def main(training_files:str, model_path:str, pretrained: str):
 
             #loss class with mask
             class_out = out[:,:,1:model_config.class_num+1]*mask_class
-            loss_class_out = loss_class(class_out, class_input*mask_class)
+            loss_class_out = loss_class(class_out.transpose(1,2), (class_input*mask_class).transpose(1,2))
             #normalize
             loss_class_out = loss_class_out / torch.sum(mask_class) * model_config.class_num
             

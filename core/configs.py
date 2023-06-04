@@ -9,9 +9,10 @@ class ModelConfig:
     """
 
     def __init__(self):
+        self.panoptic_file_path: str = "./dataset/annotations/panoptic_train2017.json"
         self.height: int = 256
         self.width: int = 256
-        self.dim: int = 512
+        self.dim: int = 384
         self.head_num: int = 2
         self.patch_size: int = 16
         self.patch_num: int = 256
@@ -30,7 +31,7 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 10
-        self.epochs: int = 40
+        self.epochs: int = 50
         self.batch_size: int = 32
         self.learning_rate: float = 0.0001
         self.step_show: int = 100

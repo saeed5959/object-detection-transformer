@@ -36,16 +36,16 @@ class LinearProjection(nn.Module):
             nn.BatchNorm2d(256),
         )
         self.conv2d_4 =nn.Sequential(
-            nn.Conv2d(256, 512, kernel_size=7, padding='same'),
-            nn.BatchNorm2d(512),
+            nn.Conv2d(256, 256, kernel_size=3, padding='same'),
+            nn.BatchNorm2d(256),
             nn.ReLU(),
-            nn.Conv2d(512, 512, kernel_size=7, padding='same'),
-            nn.BatchNorm2d(512),
+            nn.Conv2d(256, 384, kernel_size=7, padding='same'),
+            nn.BatchNorm2d(384),
         )
         self.conv1d_1 = nn.Conv2d(3, 64, kernel_size=1, padding='same')
         self.conv1d_2 = nn.Conv2d(64, 128, kernel_size=1, padding='same')
         self.conv1d_3 = nn.Conv2d(128, 256, kernel_size=1, padding='same')
-        self.conv1d_4 = nn.Conv2d(256, 512, kernel_size=1, padding='same')
+        self.conv1d_4 = nn.Conv2d(256, 384, kernel_size=1, padding='same')
         self.maxpool_1 = nn.MaxPool2d(2)
         self.maxpool_2 = nn.MaxPool2d(2)
         self.maxpool_3 = nn.MaxPool2d(2)

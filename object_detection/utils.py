@@ -2,6 +2,7 @@ import torch
 import cv2
 from einops import rearrange
 import numpy as np
+import json
 
 from core.settings import model_config
 
@@ -21,6 +22,39 @@ def img_preprocess_inference(img_path : str):
     img = img.unsqueeze(dim=0)
 
     return img
+
+
+def noraml_weight(file_path : str):
+    
+    with open(file_path) as file:
+        data_file_in = json.load(file)
+
+    annotations = data_file_in["annotations"]
+
+    category_dict = {}
+    for data in annotations:
+        data_seg = data["segments_info"]
+        for seg in data_seg:
+            id = seg["category_id"]
+            if id <= model_config.class_num:
+                if id in category_dict:
+                    category_dict[id] += 1
+                else:
+                    category_dict[id] = 1
+
+    category_dict_sort = dict(sorted(category_dict.items(),key=lambda x:x[0]))
+
+    weights = []
+    category_dict_sum = sum(category_dict_sort.values())
+    for counter in range(1,model_config.class_num+1):
+        if counter in category_dict_sort:
+            weights.append(category_dict_sum / category_dict_sort[counter])
+        else:
+            weights.append(0)
+
+    weights = torch.Tensor(np.array(weights) / model_config.class_num)
+
+    return weights
 
 
 def calculate_iou(box_a, box_b):
@@ -51,7 +85,7 @@ def nms_img(obj_out, class_out, box_out):
         obj_score = obj_out[patch]
         class_id = np.argmax(class_out[patch])
         class_score = class_out[patch][class_id]
-        if  obj_score > 0.6:
+        if  obj_score > 0.4:
             obj_score_list.append(obj_score)
 
             x = patch % 2
@@ -114,3 +148,4 @@ def show_box(img_path, class_list, box_list, out_path):
         cv2.rectangle(img, (int((box[0] - box[2]/2)*w), int((box[1] - box[3]/2)*h)), (int((box[0] + box[2]/2)*w), int((box[1] + box[3]/2)*h)), color, thickness)
 
     cv2.imwrite(out_path,img)
+
