@@ -14,10 +14,10 @@ class VitModel(nn.Module):
         self.transformer_block = transformer.Transformer()
         self.head_block = head.HeadDetect()
 
-    def forward(self, x):
+    def forward(self, x, poa, epoch):
         linear_out = self.linear_block(x)
         transformer_out = self.transformer_block(linear_out)
-        out, similarity_matrix = self.head_block(transformer_out)
+        out, similarity_matrix = self.head_block(transformer_out, poa, epoch)
 
         return out, similarity_matrix
     

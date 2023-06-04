@@ -30,7 +30,7 @@ def main(training_files:str, model_path:str, pretrained: str):
     loss_obj = nn.BCEWithLogitsLoss()
     #combination of softmax and nll loss
     class_weight = noraml_weight(model_config.panoptic_file_path)
-    loss_class = nn.CrossEntropyLoss( reduction="sum")
+    loss_class = nn.CrossEntropyLoss(weight=class_weight, reduction="sum")
     #we use "sum" instead of "mean" : because of mask
     loss_box = nn.MSELoss(reduction="sum")    
     #loss poa
@@ -50,7 +50,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             img, bbox_input, class_input, obj_id, poa_input = img.to(device), bbox_input.to(device), class_input.to(device), obj_id.to(device), poa_input.to(device)
             mask_class, mask_bbox, mask_poa = mask_class.to(device), mask_bbox.to(device), mask_poa.to(device)
             
-            out, similarity_matrix = model(img)
+            out, similarity_matrix = model(img, poa_input, torch.Tensor(epoch))
             
             #loss object
             loss_obj_out = loss_obj(out[:,:,0], obj_id)

@@ -21,6 +21,7 @@ class ModelConfig:
         self.augmentation: bool = False
         self.augment_num: int = 1
         self.iou_thresh: float = 0.5
+        self.poa_epoch: int = 15
                                                                          
 
 
@@ -31,7 +32,7 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 10
-        self.epochs: int = 50
+        self.epochs: int = 30
         self.batch_size: int = 32
         self.learning_rate: float = 0.0001
         self.step_show: int = 100
