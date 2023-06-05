@@ -27,16 +27,15 @@ def img_preprocess_inference(img_path : str):
 def noraml_weight(file_path : str):
     
     with open(file_path) as file:
-        data_file_in = json.load(file)
+        data_file_in = file.readlines()
 
-    annotations = data_file_in["annotations"]
 
     category_dict = {}
-    for data in annotations:
-        data_seg = data["segments_info"]
-        for seg in data_seg:
-            id = seg["category_id"]
-            if id <= model_config.class_num:
+    for data in data_file_in:
+        data_patch = data.split("|")[1:]
+        for patch in data_patch:
+            id = int(patch.split(",")[0])
+            if 0 < id <= 90:
                 if id in category_dict:
                     category_dict[id] += 1
                 else:
@@ -52,9 +51,11 @@ def noraml_weight(file_path : str):
         else:
             weights.append(0)
 
-    weights = torch.Tensor(np.array(weights) / model_config.class_num)
+    weights = np.array(weights) / model_config.class_num
+    weights_bound = np.minimum(10, np.maximum(0.1, weights))
+    weights_bound = torch.Tensor(weights_bound)
 
-    return weights
+    return weights_bound
 
 
 def calculate_iou(box_a, box_b):

@@ -21,11 +21,11 @@ class VitModel(nn.Module):
 
         return out, similarity_matrix
     
-    def inference(self, x):
+    def inference(self, x, poa, epoch):
         #model output
         linear_out = self.linear_block(x)
         transformer_out = self.transformer_block(linear_out)
-        out, similarity_matrix = self.head_block(transformer_out)
+        out, similarity_matrix = self.head_block(transformer_out, poa, epoch)
 
         #sigmoid for object
         obj_out = sigmoid(out[:,:,0])

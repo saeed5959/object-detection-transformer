@@ -46,7 +46,7 @@ class LinearProjection(nn.Module):
             nn.Conv2d(128, 256, kernel_size=3, padding='same'),
             nn.BatchNorm2d(256),
             nn.ReLU(),
-            nn.Conv2d(256, 384, kernel_size=7, padding='same'),
+            nn.Conv2d(256, 384, kernel_size=9, padding='same'),
             nn.BatchNorm2d(384),
         )
         self.conv1d_1 = nn.Conv2d(3, 64, kernel_size=1, padding='same')

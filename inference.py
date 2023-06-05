@@ -20,8 +20,10 @@ def inference_test(img_path : str, model_path : str):
     img = img_preprocess_inference(img_path)
     img.to(device)
 
+    poa = []
+    epoch = torch.tensor([30]).to(device)
     #giving input to model
-    obj_out, class_out, box_out = model.inference(img)
+    obj_out, class_out, box_out = model.inference(img, poa, epoch)
 
     return obj_out[0].detach().numpy(), class_out[0].detach().numpy(), box_out[0].detach().numpy()
 
