@@ -32,7 +32,7 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 10
-        self.epochs: int = 30
+        self.epochs: int = 60
         self.batch_size: int = 32
         self.learning_rate: float = 0.0001
         self.step_show: int = 100
