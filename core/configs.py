@@ -9,7 +9,7 @@ class ModelConfig:
     """
 
     def __init__(self):
-        self.panoptic_file_path: str = "./dataset/annotations/panoptic_train2017.json"
+        self.panoptic_file_path: str = "./dataset/dataset_file_out.txt"
         self.height: int = 256
         self.width: int = 256
         self.dim: int = 384
