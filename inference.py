@@ -51,12 +51,11 @@ if __name__ == "__main__":
     
     # print(inference_test(args.img_path, args.model_path))
     obj_out, class_out, box_out = inference_test(args.img_path, args.model_path)
-    print(obj_out, class_out, box_out)
-    show_obj(obj_out, class_out, box_out)
+    # print(obj_out, class_out, box_out)
+    # show_obj(obj_out, class_out, box_out)
 
     obj_score_list_final, class_list_final, class_score_list_final, box_list_final, xy_list_final = nms_img(obj_out, class_out, box_out)
-    print(obj_score_list_final, class_list_final, class_score_list_final, box_list_final, xy_list_final)
+    print(obj_score_list_final, class_list_final, class_score_list_final, box_list_final)
 
     show_box(args.img_path, class_list_final, box_list_final, args.out_path)
 
-    #apply overlap for same category

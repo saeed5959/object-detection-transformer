@@ -3,6 +3,7 @@ import cv2
 from einops import rearrange
 import numpy as np
 import json
+from PIL import Image, ImageDraw, ImageFont
 
 from core.settings import model_config
 
@@ -67,9 +68,11 @@ def calculate_iou(box_a, box_b):
 
     overlap = max(0, min(a2_x,b2_x) - max(a1_x,b1_x)) * max(0, min(a2_y,b2_y) - max(a1_y,b1_y))
     mean_area = w_a*h_a + w_b*h_b - overlap
-
-    iou = overlap / mean_area
-
+    if mean_area < 0.005:
+        iou = 1
+    else:
+        iou = overlap / mean_area
+    
     return iou
 
 
@@ -86,7 +89,7 @@ def nms_img(obj_out, class_out, box_out):
         obj_score = obj_out[patch]
         class_id = np.argmax(class_out[patch])
         class_score = class_out[patch][class_id]
-        if  obj_score > 0.4:
+        if obj_score > model_config.obj_thresh and class_score > model_config.class_thresh:
             obj_score_list.append(obj_score)
 
             x = patch % 2
@@ -101,7 +104,7 @@ def nms_img(obj_out, class_out, box_out):
 
             box_list.append(box_out[patch])
 
-    print(obj_score_list, class_list, class_score_list, box_list, xy_list)
+    # print(obj_score_list, class_list, class_score_list, box_list, xy_list)
 
     obj_score_list_final = []
     class_list_final = []
@@ -119,12 +122,12 @@ def nms_img(obj_out, class_out, box_out):
 
         len_box = len(box_list)
         ref_box = box_list[max_score_index]
+        ref_id = class_list[max_score_index]
         shift = 0
         for count in range(len_box):
             possible_box = box_list[count- shift]
-
             iou = calculate_iou(ref_box, possible_box)
-            if iou > model_config.iou_thresh:
+            if (iou > model_config.iou_thresh and ref_id==class_list[count-shift]) or count==max_score_index:
                 del obj_score_list[count-shift]
                 del class_list[count-shift]
                 del class_score_list[count-shift]
@@ -135,18 +138,37 @@ def nms_img(obj_out, class_out, box_out):
 
     return obj_score_list_final, class_list_final, class_score_list_final, box_list_final, xy_list_final
 
-# obj_out = np.array([1,0,0.6,0.7])
-# class_out = np.array([[0,1,0,0.5,0.3],[0,0,1,0,0],[0,0,0,1,0.3],[0,0,0,1,0.4]])
-# box_out = np.array([[0.2,0.2,0.1,0.1],[0,0,0,0.1],[0.5,0.5,0.2,0.2],[0.55,0.5,0.2,0.2]])
-# print(nms_img(obj_out, class_out, box_out))
 
 def show_box(img_path, class_list, box_list, out_path):
     img = cv2.imread(img_path)
     h, w, c = img.shape
     color = (255,255,255)
-    thickness = 2
-    for box in box_list:
+    thickness = 1
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 0.5
+    categories = category_name_id(model_config.json_file_path_1, model_config.json_file_path_2)
+    for box, class_id in zip(box_list, class_list):
+        class_name = categories[int(class_id)+1]
         cv2.rectangle(img, (int((box[0] - box[2]/2)*w), int((box[1] - box[3]/2)*h)), (int((box[0] + box[2]/2)*w), int((box[1] + box[3]/2)*h)), color, thickness)
-
+        cv2.putText(img, class_name, (int(box[0]*w),int(box[1]*h)), font, fontScale, color, thickness, cv2.LINE_AA,)
     cv2.imwrite(out_path,img)
 
+def category_name_id(file_path_1, file_path_2):
+    with open(file_path_1) as file:
+            data_file_in_1 = json.load(file)
+
+    categories_1 = data_file_in_1["categories"]
+
+    with open(file_path_2) as file:
+                data_file_in_2 = json.load(file)
+
+    categories_2 = data_file_in_2["categories"]
+
+    category_dict = {}
+    for data in categories_1:
+        category_dict[data["id"]] = data["name"]
+
+    for data in categories_2:
+        category_dict[data["id"]] = data["name"]
+
+    return category_dict    

@@ -10,6 +10,8 @@ class ModelConfig:
 
     def __init__(self):
         self.panoptic_file_path: str = "./dataset/dataset_file_out.txt"
+        self.json_file_path_1: str = "./dataset/annotations/panoptic_train2017_main.json"
+        self.json_file_path_2: str = "./dataset/annotations/panoptic_train2017.json"
         self.height: int = 256
         self.width: int = 256
         self.dim: int = 384
@@ -20,7 +22,9 @@ class ModelConfig:
         self.class_num: int = 90 
         self.augmentation: bool = False
         self.augment_num: int = 1
-        self.iou_thresh: float = 0.5
+        self.iou_thresh: float = 0.3
+        self.obj_thresh: float = 0.7
+        self.class_thresh: float = 0.5
         self.poa_epoch: int = 15
                                                                          
 
@@ -32,7 +36,7 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 10
-        self.epochs: int = 60
+        self.epochs: int = 40
         self.batch_size: int = 32
         self.learning_rate: float = 0.0001
         self.step_show: int = 100
