@@ -48,7 +48,7 @@ def inference_img(img_path, model, img_out_path):
     #prepare input image
     img = img_preprocess_inference(img_path)
     img.to(device)
-
+    print(img.get_device())
     poa = []
     epoch = torch.tensor([30]).to(device)
     #giving input to model
