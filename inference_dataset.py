@@ -47,6 +47,7 @@ def inference_img(img_path, model, img_out_path):
 
     #prepare input image
     img = img_preprocess_inference(img_path)
+    print(device)
     img.to(device)
     print(img.get_device())
     poa = []
