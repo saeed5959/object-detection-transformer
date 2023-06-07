@@ -33,14 +33,14 @@ def main(training_files:str, model_path:str, pretrained: str):
     print(class_weight)
     loss_class = nn.CrossEntropyLoss(weight=class_weight, reduction="sum")
     #we use "sum" instead of "mean" : because of mask
-    loss_box = nn.MSELoss(reduction="sum")    
+    loss_box = nn.L1Loss(reduction="sum")    
     #loss poa
     loss_poa = nn.BCELoss(reduction="sum")
 
     model.train()
     
-    step_all = 4000000
-    epo = torch.tensor([60]).to(device)
+    step_all = 6700000
+    epo = torch.tensor([100]).to(device)
 
     for epoch in range(1, train_config.epochs+1):
         epo += 1

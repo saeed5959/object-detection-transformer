@@ -24,23 +24,23 @@ def compare(class_gt, box_gt, class_out, box_out, img_path, img_out_gt_path):
     box_gt_norm = []
 
     for obj_id_in, obj_box_in in zip(class_gt, box_gt):
-        if int(obj_id_in)==1 :
-            all_class_count += 1
-            obj_box_in[0], obj_box_in[1], obj_box_in[2], obj_box_in[3] = obj_box_in[0]/w, obj_box_in[1]/h, obj_box_in[2]/w, obj_box_in[3]/h
-            obj_box_in[0] = obj_box_in[0] + obj_box_in[2]/2
-            obj_box_in[1] = obj_box_in[1] + obj_box_in[3]/2
-            
-            box_gt_norm.append(obj_box_in)
+        # if int(obj_id_in)==1 :
+        #     all_class_count += 1
+        obj_box_in[0], obj_box_in[1], obj_box_in[2], obj_box_in[3] = obj_box_in[0]/w, obj_box_in[1]/h, obj_box_in[2]/w, obj_box_in[3]/h
+        obj_box_in[0] = obj_box_in[0] + obj_box_in[2]/2
+        obj_box_in[1] = obj_box_in[1] + obj_box_in[3]/2
+        
+        box_gt_norm.append(obj_box_in)
 
-            for obj_id_out, obj_box_out in zip(class_out, box_out):
-                if int(obj_id_in)==int(obj_id_out+1) and calculate_iou(obj_box_in, obj_box_out) > model_config.iou_thresh_dataset:
-                    intersection_count += 1
-                    break
+        for obj_id_out, obj_box_out in zip(class_out, box_out):
+            if int(obj_id_in)==int(obj_id_out+1) and calculate_iou(obj_box_in, obj_box_out) > model_config.iou_thresh_dataset:
+                intersection_count += 1
+                break
 
     class_gt_norm = [id-1 for id in class_gt]
-    # show_box(img_path, class_gt_norm, box_gt_norm, img_out_gt_path)
+    show_box(img_path, class_gt_norm, box_gt_norm, img_out_gt_path)
 
-    return all_class_count, intersection_count
+    return all_count, intersection_count
 
 
 def inference_img(img_path, model, img_out_path):
@@ -58,7 +58,7 @@ def inference_img(img_path, model, img_out_path):
 
     obj_score_list_final, class_list_final, class_score_list_final, box_list_final, xy_list_final = nms_img(obj_out, class_out, box_out)
 
-    # show_box(img_path, class_list_final, box_list_final, img_out_path)
+    show_box(img_path, class_list_final, box_list_final, img_out_path)
 
     return class_list_final, box_list_final
 
