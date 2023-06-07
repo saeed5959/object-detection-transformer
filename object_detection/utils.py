@@ -89,7 +89,7 @@ def nms_img(obj_out, class_out, box_out):
         obj_score = obj_out[patch]
         class_id = np.argmax(class_out[patch])
         class_score = class_out[patch][class_id]
-        if obj_score > model_config.obj_thresh and class_score > model_config.class_thresh:
+        if obj_score > model_config.obj_thresh and class_score > model_config.class_thresh and box_out[patch][2] > 0.03 and box_out[patch][3] > 0.03:
             obj_score_list.append(obj_score)
 
             x = patch % 2

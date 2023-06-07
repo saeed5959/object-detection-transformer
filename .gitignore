@@ -2,6 +2,12 @@ dataset/
 
 pretrain/
 
+out/
+
+out_new/
+
+gt/
+
 __pycache__/
 
 runs/
