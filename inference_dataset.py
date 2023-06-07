@@ -38,7 +38,7 @@ def compare(class_gt, box_gt, class_out, box_out, img_path, img_out_gt_path):
                     break
 
     class_gt_norm = [id-1 for id in class_gt]
-    show_box(img_path, class_gt_norm, box_gt_norm, img_out_gt_path)
+    # show_box(img_path, class_gt_norm, box_gt_norm, img_out_gt_path)
 
     return all_class_count, intersection_count
 
@@ -58,7 +58,7 @@ def inference_img(img_path, model, img_out_path):
 
     obj_score_list_final, class_list_final, class_score_list_final, box_list_final, xy_list_final = nms_img(obj_out, class_out, box_out)
 
-    show_box(img_path, class_list_final, box_list_final, img_out_path)
+    # show_box(img_path, class_list_final, box_list_final, img_out_path)
 
     return class_list_final, box_list_final
 
