@@ -53,8 +53,8 @@ def inference_img(img_path, model, img_out_path):
     epoch = torch.tensor([30]).to(device)
     #giving input to model
     obj_out, class_out, box_out = model.inference(img, poa, epoch)
-
-    obj_out, class_out, box_out = obj_out[0].detach().numpy(), class_out[0].detach().numpy(), box_out[0].detach().numpy()
+    
+    obj_out, class_out, box_out = obj_out[0].detach().cpu().numpy(), class_out[0].detach().cpu().numpy(), box_out[0].detach().cpu().numpy()
 
     obj_score_list_final, class_list_final, class_score_list_final, box_list_final, xy_list_final = nms_img(obj_out, class_out, box_out)
 
