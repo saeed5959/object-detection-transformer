@@ -59,7 +59,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             #loss object
             loss_obj_out = torch.sum(loss_obj(out[:,:,0], obj_id) * mask_obj)
             #normalize
-            loss_obj_out = (loss_obj_out / torch.Tensor([256])).squeeze(-1)
+            loss_obj_out = (loss_obj_out / torch.tensor([256]).to(device)).squeeze(-1)
 
             #loss class with mask
             class_out = out[:,:,1:model_config.class_num+1]
@@ -78,7 +78,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             #loss poa
             loss_poa_out = torch.sum(loss_poa(similarity_matrix, poa_input) * mask_poa)
             #normalize
-            loss_poa_out = (loss_poa_out / (torch.sum(obj_id) * torch.Tensor([256]))).squeeze(-1)
+            loss_poa_out = (loss_poa_out / (torch.sum(obj_id) * torch.tensor([256]).to(device))).squeeze(-1)
 
             loss_all = loss_obj_out + loss_box_out + loss_class_out + loss_poa_out
         
