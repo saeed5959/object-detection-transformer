@@ -59,7 +59,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             #loss object
             loss_obj_out = torch.sum(loss_obj(out[:,:,0], obj_id) * mask_obj)
             #normalize
-            loss_obj_out = (loss_obj_out / torch.tensor([256]).to(device)).squeeze(-1)
+            loss_obj_out = (loss_obj_out / (torch.tensor([train_config.batch_size]).to(device) * torch.tensor([256]).to(device))).squeeze(-1)
 
             #loss class with mask
             class_out = out[:,:,1:model_config.class_num+1]
