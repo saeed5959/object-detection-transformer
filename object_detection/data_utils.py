@@ -29,11 +29,12 @@ class DatasetObjectDetection(Dataset):
         bbox = []
         class_id = []
         obj_id = []
-        mask = []
         poa = []
 
         patch_class_zero = np.zeros(model_config.class_num)
         patch_class_eye = np.eye(model_config.class_num)
+        num_patch_all_obj = 0
+        mask_all = []
 
         for patch in data_list:
             c, x, y, w, h, r, g, b = patch.split(",")
@@ -44,19 +45,22 @@ class DatasetObjectDetection(Dataset):
             if c==0:
                 obj_id.append(0)
                 class_id.append(patch_class_zero)
-                mask.append([0])
+                mask_all.append([0])
                 
             else:
+                num_patch_all_obj += 1
                 obj_id.append(1)
                 patch_class = patch_class_eye[c-1]
-
-                #label smoothing
-                #label_smoothing = np.abs(np.random.normal(0,0.05))
-                #patch_class[c] = patch_class[c] - label_smoothing 
-
                 class_id.append(patch_class)
-                mask.append([1])
+                num_patch_per_obj = 1 / (np.ceil(w / (1/16)) * np.ceil(h / (1/16)))
+                mask_all.append([num_patch_per_obj])
 
+        num_obj = len(np.unique(np.array(bbox), axis=0))
+        mask_all = np.array(mask_all)
+        if num_obj!=1:
+            mask_all = mask_all * num_patch_all_obj / (num_obj-1)
+        mask_obj = np.copy(mask_all)
+        mask_obj[np.where(mask_obj==0)] = 1
 
         poa_matrix = self.make_poa_matrix(poa)
 
@@ -64,15 +68,16 @@ class DatasetObjectDetection(Dataset):
         obj_id = torch.Tensor(np.array(obj_id))
         class_id = torch.Tensor(np.array(class_id))
         poa_matrix = torch.Tensor(np.array(poa_matrix))
-        mask_class = torch.Tensor(np.array(mask)).repeat(1,model_config.class_num)
-        mask_bbox = torch.Tensor(np.array(mask)).repeat(1,4)
-        mask_poa = torch.Tensor(np.array(mask)).repeat(1,model_config.patch_num)
+        mask_obj = torch.Tensor(mask_obj.squeeze(-1))
+        mask_class = torch.Tensor(mask_all.squeeze(-1))
+        mask_bbox = torch.Tensor(mask_all).repeat(1,4)
+        mask_poa = torch.Tensor(mask_all).repeat(1, model_config.patch_num)
 
         #augmentation
         if augment:
             img, class_id, bbox, class_mask = self.transform(img, class_id, bbox, class_mask)
 
-        return img, obj_id, class_id, bbox, poa_matrix, mask_poa, mask_class, mask_bbox
+        return img, obj_id, class_id, bbox, poa_matrix, mask_obj, mask_class, mask_bbox, mask_poa
     
     def make_poa_matrix(self, poa):
         poa_matrix = np.zeros((model_config.patch_num, model_config.patch_num))

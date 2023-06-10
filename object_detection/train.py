@@ -27,20 +27,20 @@ def main(training_files:str, model_path:str, pretrained: str):
 
     optim = torch.optim.AdamW(model.parameters(), train_config.learning_rate)
     #combination of sigmoid and nll loss for 
-    loss_obj = nn.BCEWithLogitsLoss()
+    loss_obj = nn.BCEWithLogitsLoss(reduction="none")
     #combination of softmax and nll loss
     class_weight = noraml_weight(model_config.panoptic_file_path).to(device)
     print(class_weight)
-    loss_class = nn.CrossEntropyLoss(weight=class_weight, reduction="sum")
+    loss_class = nn.CrossEntropyLoss(weight=class_weight, reduction="none")
     #we use "sum" instead of "mean" : because of mask
-    loss_box = nn.L1Loss(reduction="sum")    
+    loss_box = nn.L1Loss(reduction="none")    
     #loss poa
-    loss_poa = nn.BCELoss(reduction="sum")
+    loss_poa = nn.BCELoss(reduction="none")
 
     model.train()
     
-    step_all = 6700000
-    epo = torch.tensor([100]).to(device)
+    step_all = 9400000
+    epo = torch.tensor([140]).to(device)
 
     for epoch in range(1, train_config.epochs+1):
         epo += 1
@@ -50,33 +50,35 @@ def main(training_files:str, model_path:str, pretrained: str):
         loss_bbox_all = 0
         loss_poa_all = 0
 
-        for step, (img, obj_id, class_input, bbox_input, poa_input, mask_poa, mask_class, mask_bbox) in enumerate(train_loader):
+        for step, (img, obj_id, class_input, bbox_input, poa_input, mask_obj, mask_class, mask_bbox, mask_poa) in enumerate(train_loader):
             img, bbox_input, class_input, obj_id, poa_input = img.to(device), bbox_input.to(device), class_input.to(device), obj_id.to(device), poa_input.to(device)
-            mask_class, mask_bbox, mask_poa = mask_class.to(device), mask_bbox.to(device), mask_poa.to(device)
+            mask_obj, mask_class, mask_bbox, mask_poa = mask_obj.to(device), mask_class.to(device), mask_bbox.to(device), mask_poa.to(device)
             
             out, similarity_matrix = model(img, poa_input, epo)
-            
+
             #loss object
-            loss_obj_out = loss_obj(out[:,:,0], obj_id)
+            loss_obj_out = torch.sum(loss_obj(out[:,:,0], obj_id) * mask_obj)
+            #normalize
+            loss_obj_out = (loss_obj_out / torch.Tensor([256])).squeeze(-1)
 
             #loss class with mask
-            class_out = out[:,:,1:model_config.class_num+1]*mask_class
-            loss_class_out = loss_class(class_out.transpose(1,2), (class_input*mask_class).transpose(1,2))
+            class_out = out[:,:,1:model_config.class_num+1]
+            loss_class_out = torch.sum(loss_class(class_out.transpose(1,2), class_input.transpose(1,2)) * mask_class)
             #normalize
-            loss_class_out = loss_class_out / torch.sum(mask_class) * model_config.class_num
+            loss_class_out = loss_class_out / torch.sum(obj_id)
             
             #loss bbox with mask
-            box_out = out[:,:,model_config.class_num+1:]*mask_bbox
+            box_out = out[:,:,model_config.class_num+1:]
             #bounding box between [0,1]
             box_out = torch.minimum(torch.tensor([1]).to(device), torch.maximum(torch.tensor([0]).to(device), box_out))
-            loss_box_out = loss_box(box_out, bbox_input*mask_bbox)
+            loss_box_out = torch.sum(loss_box(box_out, bbox_input) * mask_bbox)
             #normalize
-            loss_box_out = loss_box_out / torch.sum(mask_bbox) * 4
+            loss_box_out = loss_box_out / torch.sum(obj_id)
             
             #loss poa
-            loss_poa_out = loss_poa(similarity_matrix*mask_poa, poa_input*mask_poa)
+            loss_poa_out = torch.sum(loss_poa(similarity_matrix, poa_input) * mask_poa)
             #normalize
-            loss_poa_out = loss_poa_out / torch.sum(poa_input)
+            loss_poa_out = (loss_poa_out / (torch.sum(obj_id) * torch.Tensor([256]))).squeeze(-1)
 
             loss_all = loss_obj_out + loss_box_out + loss_class_out + loss_poa_out
         
