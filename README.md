@@ -50,4 +50,9 @@ Our implementation can perform in real-time and improve the accuracy of previous
 ---
 <br/>
 
-## 
+### Sample output
+<img src="/sample.jpg" width="900" height="300" border="20" title="model">
+
+---
+
+<br/>

@@ -18,7 +18,8 @@ def compare(class_gt, box_gt, class_out, box_out, img_path, img_out_gt_path):
     img = cv2.imread(img_path)
     h, w, c = img.shape
 
-    all_count = len(class_gt)
+    gt_count = len(class_gt)
+    out_count = len(class_out)
     intersection_count = 0
     all_class_count = 0
     box_gt_norm = []
@@ -40,7 +41,7 @@ def compare(class_gt, box_gt, class_out, box_out, img_path, img_out_gt_path):
     class_gt_norm = [id-1 for id in class_gt]
     #show_box(img_path, class_gt_norm, box_gt_norm, img_out_gt_path)
 
-    return all_count, intersection_count
+    return gt_count, intersection_count, out_count
 
 
 def inference_img(img_path, model, img_out_path):
@@ -73,7 +74,8 @@ def inference(folder_in_path: str, model_path: str, folder_out_path: str, folder
     with open(ground_truth_file) as file:
         ground_truth = json.load(file)["annotations"]
 
-    all_count = 0
+    all_gt_count = 0
+    all_out_count = 0
     intersection_count = 0
 
     for data in tqdm(ground_truth):
@@ -93,16 +95,18 @@ def inference(folder_in_path: str, model_path: str, folder_out_path: str, folder
 
         class_out, box_out = inference_img(img_path, model, img_out_path)
 
-        all_count_img, intersection_count_img = compare(class_gt, box_gt, class_out, box_out, img_path, img_out_gt_path)
+        gt_count_img, intersection_count_img, out_count_img = compare(class_gt, box_gt, class_out, box_out, img_path, img_out_gt_path)
 
-        print(all_count_img, intersection_count_img)
+        print(gt_count_img, intersection_count_img, out_count_img)
 
-        all_count += all_count_img
+        all_gt_count += gt_count_img
+        all_out_count += out_count_img
         intersection_count += intersection_count_img
 
-    map = intersection_count / all_count
+    recall = intersection_count / all_gt_count
+    precision = intersection_count / all_out_count
 
-    return map
+    return recall, precision
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -113,8 +117,8 @@ if __name__ == "__main__":
     parser.add_argument("--ground_truth_file", type=str, required=True)
     args = parser.parse_args()
     
-    map = inference(args.folder_in_path, args.model_path, args.folder_out_path,args.folder_out_gt_path, args.ground_truth_file)
+    recall, precision = inference(args.folder_in_path, args.model_path, args.folder_out_path,args.folder_out_gt_path, args.ground_truth_file)
 
-    print(map)
+    print(f"recall:{recall}, precision:{precision}")
 
 
