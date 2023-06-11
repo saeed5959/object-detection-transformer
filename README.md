@@ -6,8 +6,24 @@ Official implementation of "Place of Attention Matters!" in pytorch : Article is
 This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.11929) and [Detr](https://arxiv.org/abs/2005.12872).
 <br/>
 
-The pre-train model will be added soon!!!
+---
+GOOD NEWS!!<br/>
+The pretrained model (pretrained_140.pth) only for 140 epoch without augmentation added : because the lack of availibility to GPU<br/>
 
+Preprocess
+
+    1-download coco dataset("annotations", "train2017") and unzip and put in dataset folder
+    2-python3 preprocess.py
+    3-it will make dataset_file_out.txt
+
+Train or Fine-tune
+    
+    python3 train.py --train_file_path ./dataset/dataset_file_out.txt --model_path ./m.pth --pretrained ./pretrained_140.pth
+
+Inference
+
+    python3 inference.py --img_path ./dataset/train2017/000000580197.jpg --model_path ./pretrained_140.pth --out_path ./out.jpg
+    
 ---
 ### Model Architecture
 <img src="/model.png" width="900" height="300" border="20" title="model">
