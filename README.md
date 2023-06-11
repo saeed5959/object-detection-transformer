@@ -35,7 +35,7 @@ Inference
 # Place of Attention Matters! 
 <br/>
 
-An End-to-End Object Detection with Vision Transformation
+An End-to-End Object Detection with Vision Transformation!
 
 
 In the object detection task, the purpose is to find the class of object and a bounding box
