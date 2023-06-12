@@ -59,7 +59,7 @@ def inference_img(img_path, model, img_out_path):
 
     obj_score_list_final, class_list_final, class_score_list_final, box_list_final, xy_list_final = nms_img(obj_out, class_out, box_out)
 
-    #show_box(img_path, class_list_final, box_list_final, img_out_path)
+    # show_box(img_path, class_list_final, box_list_final, img_out_path)
 
     return class_list_final, box_list_final
 
