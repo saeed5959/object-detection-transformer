@@ -39,8 +39,8 @@ def main(training_files:str, model_path:str, pretrained: str):
 
     model.train()
     
-    step_all = 16000000
-    epo = torch.tensor([240]).to(device)
+    step_all = 19400000
+    epo = torch.tensor([290]).to(device)
 
     for epoch in range(1, train_config.epochs+1):
         epo += 1
