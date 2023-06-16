@@ -39,6 +39,6 @@ class TrainConfig:
         self.save_model: int = 10
         self.epochs: int = 50
         self.batch_size: int = 32
-        self.learning_rate: float = 0.00001
+        self.learning_rate: float = 0.000005
         self.step_show: int = 100
         self.device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
