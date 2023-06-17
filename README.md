@@ -8,7 +8,7 @@ This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.1
 
 ---
 GOOD NEWS!!<br/>
-The pretrained model (pretrained_140.pth) only for 140 epoch without augmentation added : because the lack of availibility to GPU<br/>
+The pretrained model (pretrained_140.pth) only for 140 epoch without augmentation added : because the lack of access to GPU<br/>
 
 Preprocess
 
