@@ -8,7 +8,7 @@ This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.1
 
 ---
 GOOD NEWS!!<br/>
-The pretrained model (pretrained_140.pth) only for 140 epoch without augmentation added : because the lack of access to GPU
+The pretrained model (pretrained_440.pth) only for 440 epoch without augmentation added : because the lack of access to GPU
 
 ---
 Preprocess
@@ -52,8 +52,19 @@ Our implementation can perform in real-time and improve the accuracy of previous
 <br/>
 
 ### Sample output
-<img src="/sample.jpg" width="900" height="300" border="20" title="model">
+<img src="/sample.jpg" width="900" height="300" border="20" title="sample">
 
 ---
 
 <br/>
+
+### LOSS
+<img src="/images/loss_box.png" width="900" height="200" border="10" title="loss_box">
+
+<img src="/images/loss_class.png" width="900" height="200" border="10" title="loss_class">
+
+<img src="/images/loss_obj.png" width="900" height="200" border="10" title="loss_obj">
+
+<img src="/images/loss_poa.png" width="900" height="200" border="10" title="loss_poa">
+
+---
