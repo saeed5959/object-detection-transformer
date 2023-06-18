@@ -27,7 +27,7 @@ Inference
     
 ---
 ### Model Architecture
-<img src="/model.png" width="900" height="300" border="20" title="model">
+<img src="/images/model.png" width="900" height="300" border="20" title="model">
 
 ---
 
@@ -52,7 +52,7 @@ Our implementation can perform in real-time and improve the accuracy of previous
 <br/>
 
 ### Sample output
-<img src="/sample.jpg" width="900" height="300" border="20" title="sample">
+<img src="/images/sample.jpg" width="900" height="300" border="20" title="sample">
 
 ---
 
