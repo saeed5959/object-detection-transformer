@@ -15,7 +15,7 @@ class ModelConfig:
         self.height: int = 256
         self.width: int = 256
         self.dim: int = 384
-        self.head_num: int = 2
+        self.head_num: int = 8
         self.patch_size: int = 16
         self.patch_num: int = 256
         self.patch_num_h: int = 16
@@ -37,7 +37,7 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 10
-        self.epochs: int = 50
+        self.epochs: int = 40
         self.batch_size: int = 32
         self.learning_rate: float = 0.00001
         self.step_show: int = 100
