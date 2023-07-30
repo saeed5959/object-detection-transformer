@@ -1,50 +1,12 @@
 import torch
 from torch import nn
-from torch.nn.functional import softmax, relu, layer_norm
+from torch.nn.functional import softmax, relu, layer_norm, silu
 from einops import rearrange
 
 from core.settings import model_config, train_config
         
 device = train_config.device
         
-class SelfAttention_me(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.dim = model_config.dim
-        self.linear_1 = nn.Linear(self.dim, self.dim)
-        self.linear_2 = nn.Linear(self.dim, self.dim)
-        self.linear_3 = nn.Linear(self.dim, self.dim)
-
-    def forward(self, x : torch.Tensor):
-
-        ### Scaled Dot-Product Attention
-        V = x  # x : [batch_size, patch_size, vector_dim]
-        V_linear = self.linear_1(V)
-        K = x
-        K_linear = self.linear_2(K)
-        Q = x
-        Q_linear = self.linear_1(Q)
-
-        out = torch.matmul(softmax(torch.matmul(Q_linear, K_linear.transpose(1,2))/torch.sqrt(torch.tensor(self.dim).to(device)), dim=-1), V_linear)
-
-        return out
-
-
-class MultiHeadAttention_me(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.dim = model_config.dim
-        self.head_num = model_config.head_num
-        self.heads = nn.ModuleList([SelfAttention_me() for _ in range(self.head_num)]) 
-        self.linear = nn.Linear(self.dim*self.head_num, self.dim)
-
-    def forward(self, x: torch.Tensor):
-        out = [attention_head(x) for attention_head in self.heads]
-        out = torch.cat(tuple(out),dim=-1)
-        out = self.linear(out)
-        
-        return out 
-
 
 class MultiHeadAttention(nn.Module):
     def __init__(self):
@@ -86,7 +48,7 @@ class MultiHeadAttention(nn.Module):
  
 
     
-class Transformer(nn.Module):
+class TransformerBlock(nn.Module):
     def __init__(self):
         super().__init__()
         self.dim = model_config.dim
@@ -99,10 +61,25 @@ class Transformer(nn.Module):
         out_multihead_add_norm = layer_norm(out_multihead + x, [x.size()[-1]])
 
         out_FFN = self.linear_1(out_multihead_add_norm)
-        out_FFN = relu(out_FFN)
+        out_FFN = silu(out_FFN)
         out_FFN = self.linear_2(out_FFN)
 
         out = layer_norm(out_FFN + out_multihead_add_norm, [x.size()[-1]])
 
         return out
     
+class Transformer(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.transformer_num = model_config.transformer_num
+        self.layers = nn.ModuleList()
+        for layer_id in range(self.transformer_num):
+            self.layers.append(TransformerBlock()) 
+
+
+    def forward(self, x: torch.Tensor):
+        x_norm = layer_norm(x, [x.size()[-1]])
+
+        out = self.layers(x_norm)
+
+        return out
