@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch.nn.functional import layer_norm, relu
 from einops import rearrange
+from torchvision.models import resnet50, efficientnet_v2_m
 
 from core.settings import model_config, train_config
 
@@ -101,3 +102,89 @@ class LinearProjection(nn.Module):
 
         return out
     
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+        
+    def forward(self, x):
+        return x
+    
+
+class ResnetCNN(nn.Module):
+    '''
+    input : [1, 3, 224, 224]
+    feature output : [1, 2048, 7, 7]
+    output : [1, 49, 2048]
+
+    '''
+    def __init__(self):
+        super().__init__()
+        self.dim = model_config.dim
+        self.patch_num = model_config.patch_num
+        model = resnet50(weights="IMAGENET1K_V2")
+        model.fc = Identity()
+        model.avgpool = Identity()
+        self.cnn = torch.nn.Sequential(*(list(model.children())[0:8]))
+
+        self.pos_embed = nn.Embedding(self.patch_num,self.dim)
+
+    def forward(self, x):
+        x = self.cnn(x)
+        x = self.divide_patch(x)
+            
+        pos = self.position_embedding(x)
+        out = x+pos
+
+        return out
+    
+    def divide_patch(self, x):
+        out = rearrange(x, 'b c h w -> b (h w) c')
+        
+        return out
+    
+    def position_embedding(self, x):
+        #using a learnable 1D-embedding in a raster order
+        batch_number, patch_number, dim_size = x.size()
+        pos = torch.arange(patch_number).repeat(batch_number,1).to(device)
+        out = self.pos_embed(pos)
+
+        return out
+    
+
+class EfficientCNN(nn.Module):
+    '''
+    input : [1, 3, 480, 480]
+    feature output : [1, 1280, 15, 15]
+    output : [1, 225, 1280]
+
+    '''
+    def __init__(self):
+        super().__init__()
+        self.dim = model_config.dim
+        self.patch_num = model_config.patch_num
+        model = efficientnet_v2_m(weights="IMAGENET1K_V1")
+        self.cnn = model.features
+
+        self.pos_embed = nn.Embedding(self.patch_num,self.dim)
+
+    def forward(self, x):
+        x = self.cnn(x)
+        x = self.divide_patch(x)
+            
+        pos = self.position_embedding(x)
+        out = x+pos
+
+        return out
+    
+    def divide_patch(self, x):
+        out = rearrange(x, 'b c h w -> b (h w) c')
+        
+        return out
+    
+    def position_embedding(self, x):
+        #using a learnable 1D-embedding in a raster order
+        batch_number, patch_number, dim_size = x.size()
+        pos = torch.arange(patch_number).repeat(batch_number,1).to(device)
+        out = self.pos_embed(pos)
+
+        return out

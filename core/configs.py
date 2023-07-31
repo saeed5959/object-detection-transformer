@@ -14,8 +14,8 @@ class ModelConfig:
         self.json_file_path_2: str = "./dataset/annotations/panoptic_train2017.json"
         self.height: int = 256
         self.width: int = 256
-        self.dim: int = 384
-        self.head_num: int = 8
+        self.dim: int = 1280 # efficientnet =1280 and resnet = 2048
+        self.head_num: int = 16
         self.patch_size: int = 16
         self.patch_num: int = 256
         self.patch_num_h: int = 16
@@ -27,7 +27,8 @@ class ModelConfig:
         self.class_thresh: float = 0.7
         self.poa_epoch: int = 15
         self.iou_thresh_dataset: float = 0.1
-        self.transformer_num: int = 4
+        self.transformer_num: int = 6
+        self.droupout_rate: float = 0.1
                                                                          
 
 
@@ -37,9 +38,9 @@ class TrainConfig:
     """
 
     def __init__(self):
-        self.save_model: int = 10
-        self.epochs: int = 40
-        self.batch_size: int = 32
-        self.learning_rate: float = 0.00001
+        self.save_model: int = 50
+        self.epochs: int = 100
+        self.batch_size: int = 64
+        self.learning_rate: float = 0.0001
         self.step_show: int = 100
         self.device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")

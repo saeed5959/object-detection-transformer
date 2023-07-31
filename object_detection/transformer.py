@@ -52,21 +52,32 @@ class TransformerBlock(nn.Module):
     def __init__(self):
         super().__init__()
         self.dim = model_config.dim
+        self.dropout_rate = model_config.droupout_rate
         self.multihead = MultiHeadAttention() 
+
         self.linear_1 = nn.Linear(self.dim, 2048)
         self.linear_2 = nn.Linear(2048, self.dim)
 
+        self.norm_1 = nn.LayerNorm(self.dim)
+        self.norm_2 = nn.LayerNorm(self.dim)
+
+        self.dropout_1 = nn.Dropout(self.dropout_rate)
+        self.dropout_2 = nn.Dropout(self.dropout_rate)
+        self.dropout_3 = nn.Dropout(self.dropout_rate)
+
     def forward(self, x: torch.Tensor):
-        out_multihead = self.multihead(x)
-        out_multihead_add_norm = layer_norm(out_multihead + x, [x.size()[-1]])
+        x_norm = self.norm_1(x)
+        out_multihead = self.multihead(x_norm)
+        out_multihead = x + self.dropout_1(out_multihead) 
+        out_multihead_norm = self.norm_2(out_multihead)
 
-        out_FFN = self.linear_1(out_multihead_add_norm)
-        out_FFN = silu(out_FFN)
-        out_FFN = self.linear_2(out_FFN)
+        out_linear_1 = silu(self.linear_1(out_multihead_norm))
+        out_linear_2 = self.linear_2(self.dropout_2(out_linear_1))
 
-        out = layer_norm(out_FFN + out_multihead_add_norm, [x.size()[-1]])
+        out = out_multihead + self.dropout_3(out_linear_2)
 
         return out
+    
     
 class Transformer(nn.Module):
     def __init__(self):
@@ -78,8 +89,7 @@ class Transformer(nn.Module):
 
 
     def forward(self, x: torch.Tensor):
-        x_norm = layer_norm(x, [x.size()[-1]])
 
-        out = self.layers(x_norm)
+        out = self.layers(x)
 
         return out

@@ -11,3 +11,6 @@ gt/
 __pycache__/
 
 runs/
+
+test.py
+test.ipynb
