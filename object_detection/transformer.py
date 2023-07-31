@@ -90,6 +90,7 @@ class Transformer(nn.Module):
 
     def forward(self, x: torch.Tensor):
 
-        out = self.layers(x)
+        for block in self.layers: 
+            x = block(x)
 
-        return out
+        return x
