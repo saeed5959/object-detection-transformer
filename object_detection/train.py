@@ -19,13 +19,23 @@ def main(training_files:str, model_path:str, pretrained: str):
                               batch_size=train_config.batch_size)
 
     model = models.VitModel().to(device)
+
     if pretrained != "":
-        model = load_pretrained(model, pretrained, device)
+        checkpoints = load_pretrained(model, pretrained, device)
+        model = checkpoints['model']
+        step_all = checkpoints['step_all']
+        epo = torch.tensor([checkpoints['epoch']]).to(device)
+        lr = checkpoints['lr']
         print("pretrained model loaded!")
+
     else:
+        step_all = 0
+        epo = torch.tensor([0]).to(device)
+        lr = train_config.learning_rate
         print("pretrained model didn't load!")
 
-    optim = torch.optim.AdamW(model.parameters(), train_config.learning_rate)
+    optim = torch.optim.AdamW(model.parameters(), lr)
+    lr_schedular = torch.optim.lr_scheduler.LinearLR(optim, start_factor=1, end_factor=train_config.lr_end / lr, total_iters=200)
     #combination of sigmoid and nll loss for 
     loss_obj = nn.BCEWithLogitsLoss(reduction="none")
     #combination of softmax and nll loss
@@ -39,8 +49,7 @@ def main(training_files:str, model_path:str, pretrained: str):
 
     model.train()
     
-    step_all = 39100000
-    epo = torch.tensor([570]).to(device)
+
 
     for epoch in range(1, train_config.epochs+1):
         epo += 1
@@ -92,7 +101,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             loss_poa_all += loss_poa_out
 
             if step % train_config.step_show == 0:
-                step_all += step
+                step_all += train_config.step_show
                 #writing in tensorboard
                 loss_obj_all = loss_obj_all / train_config.step_show
                 loss_class_all = loss_class_all / train_config.step_show
@@ -113,6 +122,12 @@ def main(training_files:str, model_path:str, pretrained: str):
                 loss_bbox_all = 0
                 loss_poa_all = 0
 
+        lr_schedular.step()
+        print(f"lr = {lr_schedular.get_last_lr()}")
+        
         if epoch % train_config.save_model == 0:
-            torch.save(model.state_dict(), model_path)
+            torch.save({'model':model.state_dict(),
+                        'step_all':step_all,
+                        'epoch':epo,
+                        'lr':lr_schedular.get_last_lr()}, model_path)
 

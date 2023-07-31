@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from torch.nn.functional import softmax, relu, layer_norm, silu
+from torch.nn.functional import softmax, silu
 from einops import rearrange
 
 from core.settings import model_config, train_config

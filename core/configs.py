@@ -12,13 +12,13 @@ class ModelConfig:
         self.panoptic_file_path: str = "./dataset/dataset_file_out.txt"
         self.json_file_path_1: str = "./dataset/annotations/panoptic_train2017_main.json"
         self.json_file_path_2: str = "./dataset/annotations/panoptic_train2017.json"
-        self.height: int = 256
-        self.width: int = 256
+        self.height: int = 480
+        self.width: int = 480
         self.dim: int = 1280 # efficientnet =1280 and resnet = 2048
         self.head_num: int = 16
-        self.patch_size: int = 16
-        self.patch_num: int = 256
-        self.patch_num_h: int = 16
+        self.patch_size: int = 32
+        self.patch_num: int = 225
+        self.patch_num_h: int = 15
         self.class_num: int = 90 
         self.augmentation: bool = False
         self.augment_num: int = 1
@@ -42,5 +42,6 @@ class TrainConfig:
         self.epochs: int = 100
         self.batch_size: int = 64
         self.learning_rate: float = 0.0001
+        self.lr_end: float = 0.00001
         self.step_show: int = 100
         self.device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")

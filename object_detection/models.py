@@ -10,7 +10,7 @@ device = train_config.device
 class VitModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.linear_block = linear_patch.LinearProjection()
+        self.linear_block = linear_patch.EfficientCNN()
         self.transformer_block = transformer.Transformer()
         self.head_block = head.HeadDetect()
 
