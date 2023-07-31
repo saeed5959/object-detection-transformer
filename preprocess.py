@@ -10,7 +10,7 @@ from core.settings import model_config
 def img_preprocess(img_path: str, img_path_out: str):
 
     img = cv2.imread(img_path)
-    img = cv2.resize(img,(256,256))
+    img = cv2.resize(img,(480,480))
     cv2.imwrite(img_path_out, img)
 
     return

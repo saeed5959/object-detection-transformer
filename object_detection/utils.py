@@ -3,7 +3,8 @@ import cv2
 from einops import rearrange
 import numpy as np
 import json
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
+from torchvision.models import EfficientNet_V2_M_Weights
 
 from core.settings import model_config
 
@@ -14,7 +15,7 @@ def load_pretrained(model: object, pretrained: str, device: str):
 
     return model
 
-def img_preprocess_inference(img_path : str):
+def img_preprocess_inference_old(img_path : str):
     img = cv2.imread(img_path) / 255
     img = cv2.resize(img,(256,256))
 
@@ -24,6 +25,13 @@ def img_preprocess_inference(img_path : str):
 
     return img
 
+def img_preprocess_inference(img_path : str):
+    weights= EfficientNet_V2_M_Weights.DEFAULT
+    preprocess = weights.transforms()
+    img = Image.open(img_path)
+    img = preprocess(img).unsqueeze(dim=0)
+
+    return img
 
 def noraml_weight(file_path : str):
     

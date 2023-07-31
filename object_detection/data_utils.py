@@ -1,8 +1,8 @@
 import torch
 from torch.utils.data import Dataset
-import cv2
 import numpy as np
-from einops import rearrange
+from PIL import Image
+from torchvision.models import EfficientNet_V2_M_Weights
 
 from core.settings import model_config
 
@@ -13,6 +13,8 @@ class DatasetObjectDetection(Dataset):
         with open(dataset_file_path) as file:
             self.dataset_file = file.readlines()
         self.transform = transform
+        weights= EfficientNet_V2_M_Weights.DEFAULT
+        self.preprocess = weights.transforms()
         
     def get_image(self, data: str, augment: bool):
         #split data with |
@@ -20,9 +22,8 @@ class DatasetObjectDetection(Dataset):
 
         #read image and convert to tensor
         img_path = data_list[0]
-        img = cv2.imread(img_path) / 255
-        img = rearrange(img, 'h w c -> c h w')
-        img = torch.Tensor(img)
+        img = Image.open(img_path)
+        img = self.preprocess(img)
 
         #read bounding box
         data_list = data_list[1:]
@@ -87,6 +88,7 @@ class DatasetObjectDetection(Dataset):
             poa_matrix[index,arg_place] = 1
 
         return  poa_matrix
+    
     
     def __getitem__(self,index):
         if self.model_config.augmentation:
