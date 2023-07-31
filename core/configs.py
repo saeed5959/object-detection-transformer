@@ -40,7 +40,7 @@ class TrainConfig:
     def __init__(self):
         self.save_model: int = 50
         self.epochs: int = 100
-        self.batch_size: int = 4
+        self.batch_size: int = 8
         self.learning_rate: float = 0.0001
         self.lr_end: float = 0.00001
         self.step_show: int = 100
