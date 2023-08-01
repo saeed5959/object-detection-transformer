@@ -25,7 +25,7 @@ class ModelConfig:
         self.iou_thresh: float = 0.1
         self.obj_thresh: float = 0.9
         self.class_thresh: float = 0.7
-        self.poa_epoch: int = 15
+        self.poa_epoch: int = 10
         self.iou_thresh_dataset: float = 0.1
         self.transformer_num: int = 4
         self.droupout_rate: float = 0.1
@@ -39,7 +39,7 @@ class TrainConfig:
 
     def __init__(self):
         self.save_model: int = 2
-        self.epochs: int = 10
+        self.epochs: int = 12
         self.batch_size: int = 10
         self.learning_rate: float = 0.0001
         self.lr_end: float = 0.00001
