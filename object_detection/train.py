@@ -96,7 +96,7 @@ def main(training_files:str, model_path:str, pretrained: str):
             loss_bbox_all += loss_box_out
             loss_poa_all += loss_poa_out
 
-            if step % train_config.step_show == 0:
+            if step % train_config.step_show == 0 and step!=0:
                 step_all += train_config.step_show
                 #writing in tensorboard
                 loss_obj_all = loss_obj_all / train_config.step_show
