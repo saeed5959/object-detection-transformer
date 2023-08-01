@@ -10,10 +10,14 @@ from core.settings import model_config
 
 def load_pretrained(model: object, pretrained: str, device: str):
 
-    pretrained_model = torch.load(pretrained, map_location=device)
+    checkpoints = torch.load(pretrained, map_location=device)
+    pretrained_model = checkpoints['model']
+    step_all = checkpoints['step_all']
+    epo = torch.tensor([checkpoints['epoch']]).to(device)
+    lr = checkpoints['lr']
     model.load_state_dict(pretrained_model)
 
-    return model
+    return model, step_all, epo, lr
 
 def img_preprocess_inference_old(img_path : str):
     img = cv2.imread(img_path) / 255

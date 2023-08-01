@@ -21,11 +21,7 @@ def main(training_files:str, model_path:str, pretrained: str):
     model = models.VitModel().to(device)
 
     if pretrained != "":
-        checkpoints = load_pretrained(model, pretrained, device)
-        model = checkpoints['model']
-        step_all = checkpoints['step_all']
-        epo = torch.tensor([checkpoints['epoch']]).to(device)
-        lr = checkpoints['lr']
+        model, step_all, epo, lr = load_pretrained(model, pretrained, device)
         print("pretrained model loaded!")
 
     else:
