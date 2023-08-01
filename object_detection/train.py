@@ -29,7 +29,7 @@ def main(training_files:str, model_path:str, pretrained: str):
         epo = torch.tensor([0]).to(device)
         lr = train_config.learning_rate
         print("pretrained model didn't load!")
-    print(lr)
+
     optim = torch.optim.AdamW(model.parameters(), lr)
     lr_schedular = torch.optim.lr_scheduler.LinearLR(optim, start_factor=1, end_factor=train_config.lr_end / lr, total_iters=200)
     #combination of sigmoid and nll loss for 

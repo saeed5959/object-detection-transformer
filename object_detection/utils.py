@@ -14,7 +14,7 @@ def load_pretrained(model: object, pretrained: str, device: str):
     pretrained_model = checkpoints['model']
     step_all = checkpoints['step_all']
     epo = torch.tensor([checkpoints['epoch']]).to(device)
-    lr = checkpoints['lr']
+    lr = checkpoints['lr'][0]
     model.load_state_dict(pretrained_model)
 
     return model, step_all, epo, lr
