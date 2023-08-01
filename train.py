@@ -2,7 +2,7 @@ import argparse
 from object_detection import train
 
 
-def tts_train(train_file_path: str ,model_path: str, pretrained: str=""):
+def detect_train(train_file_path: str ,model_path: str, pretrained: str=""):
     
     train.main(train_file_path, model_path, pretrained)
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.pretrained:
-        tts_train(args.train_file_path, args.model_path, args.pretrained)
+        detect_train(args.train_file_path, args.model_path, args.pretrained)
     else:
-        tts_train(args.train_file_path, args.model_path)
+        detect_train(args.train_file_path, args.model_path)
                 
