@@ -19,7 +19,8 @@ class HeadDetect(nn.Module):
     def forward(self, x, poa, epoch):
         x_linear = self.linear_similarity(x)
         #bound between (0,1)
-        similarity_matrix = torch.min(torch.tensor([1]).to(device), relu(torch.matmul(x_linear, x_linear.transpose(1,2)) / self.patch_num))
+        similarity_matrix = torch.matmul(x_linear, x_linear.transpose(1,2))
+        similarity_matrix = relu( similarity_matrix / torch.max(similarity_matrix) )
         
         if epoch > self.poa_epoch:
             similarity_matrix_main = similarity_matrix
