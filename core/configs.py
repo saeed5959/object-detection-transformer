@@ -44,4 +44,5 @@ class TrainConfig:
         self.learning_rate: float = 0.0001
         self.lr_end: float = 0.00001
         self.step_show: int = 100
+        self.max_norm: float = 0.1
         self.device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -89,6 +89,8 @@ def main(training_files:str, model_path:str, pretrained: str):
         
             optim.zero_grad()
             loss_all.backward()
+            if train_config.max_norm > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), train_config.max_norm)
             optim.step()
             
             loss_obj_all += loss_obj_out
