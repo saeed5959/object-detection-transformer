@@ -12,5 +12,7 @@ __pycache__/
 
 runs/
 
+tens_new/
+
 test.py
 test.ipynb
