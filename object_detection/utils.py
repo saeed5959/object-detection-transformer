@@ -32,8 +32,7 @@ def img_preprocess_inference_old(img_path : str):
 def img_preprocess_inference(img_path : str):
     weights= EfficientNet_V2_M_Weights.DEFAULT
     preprocess = weights.transforms()
-    print(img_path)
-    img = Image.open(img_path)
+    img = Image.open(img_path).convert('RGB')
     img = preprocess(img).unsqueeze(dim=0)
 
     return img
