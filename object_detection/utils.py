@@ -25,8 +25,6 @@ def img_preprocess_inference_old(img_path : str):
 
     img = rearrange(img, 'h w c -> c h w')
     img = torch.Tensor(img)
-    print(img_path)
-    print(img.shape)
     img = img.unsqueeze(dim=0)
 
     return img
@@ -34,6 +32,7 @@ def img_preprocess_inference_old(img_path : str):
 def img_preprocess_inference(img_path : str):
     weights= EfficientNet_V2_M_Weights.DEFAULT
     preprocess = weights.transforms()
+    print(img_path)
     img = Image.open(img_path)
     img = preprocess(img).unsqueeze(dim=0)
 
