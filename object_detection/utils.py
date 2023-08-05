@@ -25,6 +25,8 @@ def img_preprocess_inference_old(img_path : str):
 
     img = rearrange(img, 'h w c -> c h w')
     img = torch.Tensor(img)
+    print(img_path)
+    print(img.shape)
     img = img.unsqueeze(dim=0)
 
     return img
