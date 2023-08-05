@@ -68,7 +68,7 @@ def inference(folder_in_path: str, model_path: str, folder_out_path: str, folder
 
     #load model
     model = models.VitModel().to(device)
-    model = load_pretrained(model, model_path, device)
+    model, step_all, epo, lr = load_pretrained(model, model_path, device)
     model.eval()
 
     with open(ground_truth_file) as file:
