@@ -23,7 +23,7 @@ class ModelConfig:
         self.augmentation: bool = False
         self.augment_num: int = 1
         self.iou_thresh: float = 0.1
-        self.obj_thresh: float = 0.9
+        self.obj_thresh: float = 0.7
         self.class_thresh: float = 0.7
         self.poa_epoch: int = 10
         self.iou_thresh_dataset: float = 0.5
