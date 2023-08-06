@@ -113,7 +113,7 @@ def inference(folder_in_path: str, model_path: str, folder_out_path: str, folder
 
     recall = intersection_count / all_gt_count
     precision = intersection_count / all_out_count
-    mAP = np.sum(intersection_class_out_count / class_out_count) / 90
+    mAP = np.sum((intersection_class_out_count+1) / (class_out_count+1)) / 90
     return recall, precision, mAP
 
 if __name__ == "__main__":
