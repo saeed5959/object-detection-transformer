@@ -8,7 +8,11 @@ This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.1
 
 ---
 GOOD NEWS!!<br/>
-The pretrained model (pretrained_440.pth) only for 440 epoch without augmentation added : because the lack of access to GPU
+The pretrained model for 56 epoch is in [Drive](https://drive.google.com/file/d/1fNFAW1WeSJEpe4U-tlyZadDuo2jpqRay/view?usp=sharing)
+
+### Model Architecture
+<img src="/images/result.png" width="900" height="300" border="20" title="model">
+
 
 ---
 Preprocess
@@ -19,11 +23,11 @@ Preprocess
 
 Train or Fine-tune
     
-    python3 train.py --train_file_path ./dataset/dataset_file_out.txt --model_path ./m.pth --pretrained ./pretrained_140.pth
+    python3 train.py --train_file_path ./dataset/dataset_file_out.txt --model_path ./m.pth --pretrained ./x_56.pth
 
 Inference
 
-    python3 inference.py --img_path ./dataset/train2017/000000580197.jpg --model_path ./pretrained_140.pth --out_path ./out.jpg
+    python3 inference.py --img_path ./dataset/train2017/000000580197.jpg --model_path ./x_56.pth --out_path ./out.jpg
     
 ---
 ### Model Architecture
