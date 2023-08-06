@@ -10,8 +10,8 @@ This work has been inspired by [vision transformer](https://arxiv.org/abs/2010.1
 GOOD NEWS!!<br/>
 The pretrained model for 56 epoch is in [Drive](https://drive.google.com/file/d/1fNFAW1WeSJEpe4U-tlyZadDuo2jpqRay/view?usp=sharing)
 
-### Model Architecture
-<img src="/images/result.png" width="900" height="300" border="20" title="model">
+### Model Result
+<img src="/images/result.png" width="450" height="120" border="20" title="model">
 
 
 ---
