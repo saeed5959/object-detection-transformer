@@ -26,7 +26,7 @@ class ModelConfig:
         self.obj_thresh: float = 0.25
         self.class_thresh: float = 0.5
         self.poa_epoch: int = 10
-        self.iou_thresh_dataset: float = 0.1
+        self.iou_thresh_dataset: float = 0.5
         self.transformer_num: int = 4
         self.droupout_rate: float = 0.1
                                                                          
