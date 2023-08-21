@@ -13,19 +13,20 @@ def inference_test(img_path : str, model_path : str):
 
     #load model
     model = models.VitModel().to(device)
-    model = load_pretrained(model, model_path, device)
+    model, step_all, epo, lr = load_pretrained(model, model_path, device)
     model.eval()
 
     #prepare input image
     img = img_preprocess_inference(img_path)
-    img.to(device)
+    img = img.to(device)
+    
 
     poa = []
     epoch = torch.tensor([30]).to(device)
     #giving input to model
     obj_out, class_out, box_out = model.inference(img, poa, epoch)
 
-    return obj_out[0].detach().numpy(), class_out[0].detach().numpy(), box_out[0].detach().numpy()
+    return obj_out[0].detach().cpu().numpy(), class_out[0].detach().cpu().numpy(), box_out[0].detach().cpu().numpy()
 
 def show_obj(obj_out, class_out, box_out):
     img = np.ones((16,16,3))*255
