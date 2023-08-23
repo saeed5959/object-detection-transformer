@@ -4,12 +4,13 @@ from torch.nn.functional import sigmoid, softmax
 import onnx
 from openvino.runtime import Core
 
-from object_detection import models
+from object_detection import models_inference
 from object_detection.utils import load_pretrained, img_preprocess_inference, nms_img, show_box
 from core.settings import train_config,model_config
 
 device = train_config.device
-
+## important
+#change device to cpu in config
 
 def convert_onnx(model, onnx_path, input_img):
 	
@@ -32,7 +33,7 @@ def convert_openvino(onnx_path):
 def inference_test(img_path : str, model_path : str):
     
     #load model
-    model = models.VitModel().to(device)
+    model = models_inference.VitModel().to(device)
     model, step_all, epo, lr = load_pretrained(model, model_path, device)
     model.eval()
 
@@ -40,12 +41,10 @@ def inference_test(img_path : str, model_path : str):
     img = img_preprocess_inference(img_path)
     img = img.to(device)
     
-    poa = []
-    epoch = torch.tensor([30]).to(device)
 
     #for tensorrt : first convert to onnx then convert onnx to tensorrt
     onnx_path = "./model_onnx.onnx"
-    # convert_onnx(model, onnx_path, img)
+    convert_onnx(model, onnx_path, img)
     model_openvino = convert_openvino(onnx_path)
 
     out = model_openvino([img.numpy()])[0]
